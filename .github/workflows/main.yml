@@ -1,0 +1,564 @@
+meta:
+  project: "Artesano Cafe — Website & Online Ordering Platform"
+  version: "1.0.0"
+  budget_tier: "standard"
+  timeline_weeks: 6
+  workflow_engine: "generic task-graph"
+  created_at: "2026-10-10"
+  author: "Senior Web Project Lead & Workflow Architect"
+
+objectives:
+  business_goal: "Establish an artisan digital storefront for Artesano Cafe in Tribeca, generating 120+ weekly online pick-up/delivery orders and driving foot traffic within 60 days of launch."
+  primary_conversion: "online_order_checkout"
+  secondary_conversions:
+    - "get_directions_click"
+    - "click_to_call"
+    - "newsletter_signup"
+
+personas:
+  - id: "p_morning_commuter"
+    name: "Tribeca Commuter (Sarah)"
+    need: "Quick mobile ordering of espresso and breakfast sandwich between 8:00 AM and 10:30 AM with guaranteed ready time."
+    pain_point: "Slow loading pages, complex sign-up flows, unclear pickup spot instructions."
+  - id: "p_neighbourhood_foodie"
+    name: "Local Gourmet Enthusiast (Marcus)"
+    need: "Browsing bakery specialties (chicharron, alfajores), checking ingredients and dietary tags, viewing cafe aesthetic."
+    pain_point: "Outdated PDF menus, lack of allergen indicators, missing photos."
+
+scope:
+  in_scope:
+    - "Mobile-first responsive web application (360px to 1920px)"
+    - "Real-time menu with category filters, dietary tags, and morning menu schedule (8:00 AM - 11:00 AM)"
+    - "End-to-end shopping cart and tokenized secure checkout flow"
+    - "Headless CMS for daily menu, pricing, hours, and store status toggles"
+    - "Service modes: Kerbside pickup, Takeaway, Delivery, Dine-in"
+    - "Live order tracking page with status timeline and countdown"
+    - "Local SEO and schema.org Restaurant/Menu structured data"
+    - "Google Maps, Stripe, and GA4 event integrations"
+  out_of_scope:
+    - "Native iOS/Android App Store release (handled via PWA)"
+    - "Third-party courier fleet dispatch management"
+    - "Enterprise multi-unit franchise management"
+
+tech_stack:
+  frontend: "Next.js 14 (App Router, React, Tailwind CSS)"
+  cms: "Sanity.io (Headless Content Lake & Studio)"
+  database_cache: "Upstash Redis (Cart sessions and idempotency keys)"
+  payments: "Stripe (Payment Element, Apple Pay, Google Pay)"
+  hosting_cdn: "Vercel Enterprise Edge Network"
+  analytics: "Google Analytics 4 & Google Tag Manager"
+  email_notifications: "Resend (Transactional receipts and alerts)"
+
+workflow:
+  - id: "ph_discovery"
+    name: "Discovery & Strategy"
+    objective: "Establish market positioning, user journeys, sitemap, and quantifiable success metrics."
+    owner_role: "Digital Strategist"
+    tasks:
+      - id: "t_competitor_audit"
+        title: "Tribeca Cafe Competitor & Market Audit"
+        description: "Benchmark 5 neighbourhood coffee shops on menu clarity, digital ordering speed, and mobile Core Web Vitals."
+        owner_role: "Digital Strategist"
+        inputs: ["cafe_brief", "target_audience_profile"]
+        outputs: ["competitor_benchmark_report.md"]
+        tools: ["PageSpeed Insights", "SEMrush", "Google Maps Local Finder"]
+        depends_on: []
+        effort: "1.5d"
+        definition_of_done: "Report detailing UX strengths, gaps, pricing norms, and mobile benchmarks for 5 competitor cafes."
+      - id: "t_sitemap_ia"
+        title: "Information Architecture & Sitemap Specification"
+        description: "Design page tree: Home, Menu (Morning/Full), Story & Heritage, Gallery, Location & Hours, Cart, Checkout, Order Tracking, Legal."
+        owner_role: "Information Architect"
+        inputs: ["competitor_benchmark_report.md"]
+        outputs: ["sitemap_spec.json", "user_journey_flows.pdf"]
+        tools: ["FigJam", "Miro"]
+        depends_on: ["t_competitor_audit"]
+        effort: "1d"
+        definition_of_done: "Signed-off 8-route sitemap with URL structures, canonical rules, and conversion funnels."
+    exit_criteria: "Sitemap, user personas, and target KPIs formally approved in writing by cafe owner."
+
+  - id: "ph_brand_content"
+    name: "Brand & Content Strategy"
+    objective: "Translate artisan Italian cafe identity into luxury web visual assets and tone of voice."
+    owner_role: "Brand Designer"
+    tasks:
+      - id: "t_design_tokens"
+        title: "Digital Design System & Color Palette Definition"
+        description: "Codify espresso brown (#2A1E17), warm caramel (#B9793A), soft gold (#D9B36C), cream (#F6F1E7), and deep charcoal (#121212) with WCAG AA ratios."
+        owner_role: "Brand Designer"
+        inputs: ["brand_guidelines"]
+        outputs: ["design_tokens.json", "typography_scale.css"]
+        tools: ["Figma", "Contrast Checker"]
+        depends_on: ["t_sitemap_ia"]
+        effort: "1.5d"
+        definition_of_done: "Tokens exportable to Tailwind CSS, verifying minimum 4.5:1 text contrast on all surfaces."
+      - id: "t_photoshoot_curation"
+        title: "Product & Interior Photography Curation"
+        description: "Direct shot-list and asset optimization for signature dishes: Chicharrón, Alfajores, Avocado Toast, Cortado, and Tribeca interior."
+        owner_role: "Creative Director"
+        inputs: ["menu_item_catalog"]
+        outputs: ["raw_assets_drive_folder", "photo_metadata_manifest.csv"]
+        tools: ["Adobe Lightroom", "Capture One"]
+        depends_on: ["t_design_tokens"]
+        effort: "2d"
+        definition_of_done: "15 high-resolution food and interior master photos retouched, color-graded, and logged with descriptive alt tags."
+    exit_criteria: "Complete brand visual library and approved design tokens available for design and development."
+
+  - id: "ph_ux_design"
+    name: "UX & Design"
+    objective: "Produce accessible, high-conversion mobile-first UI screens and interactive prototype."
+    owner_role: "Lead UI/UX Designer"
+    tasks:
+      - id: "t_wireframing"
+        title: "Mobile-First UX Wireframes"
+        description: "Draft layouts for fast thumb-zone ordering, category scroll-spy pills, item customizer sheets, and 3-step checkout."
+        owner_role: "Lead UI/UX Designer"
+        inputs: ["sitemap_spec.json", "design_tokens.json"]
+        outputs: ["wireframe_deck.fig"]
+        tools: ["Figma"]
+        depends_on: ["t_photoshoot_curation"]
+        effort: "2.5d"
+        definition_of_done: "Low-fidelity wireframes for all 8 views covering mobile (390px), tablet (768px), and desktop (1440px)."
+      - id: "t_hi_fi_prototype"
+        title: "High-Fidelity Interactive Ordering Prototype"
+        description: "Apply luxury visual system to wireframes, incorporating micro-animations, sticky cart preview, and order tracker."
+        owner_role: "Lead UI/UX Designer"
+        inputs: ["wireframe_deck.fig", "design_tokens.json"]
+        outputs: ["hifi_prototype_clickable.fig"]
+        tools: ["Figma Prototype"]
+        depends_on: ["t_wireframing"]
+        effort: "3d"
+        definition_of_done: "Clickable prototype validating add-to-cart, modifier customization, and checkout flows approved by stakeholders."
+    exit_criteria: "High-fidelity Figma components, tokens, and interactions fully spec'd for frontend development."
+
+  - id: "ph_content_production"
+    name: "Content & Media Production"
+    objective: "Prepare all structured menu records, dietary tags, localized copy, and optimized image variants."
+    owner_role: "Content Strategist"
+    tasks:
+      - id: "t_menu_content_model"
+        title: "Menu Data Ingestion & Localization Matrix"
+        description: "Structure 45+ menu items across Morning Menu, Coffee & Tea, Cold Beverages, Signature Drinks, Pastries, and Sandwiches with USD/INR pricing."
+        owner_role: "Content Strategist"
+        inputs: ["printed_menu_source", "photo_metadata_manifest.csv"]
+        outputs: ["menu_seed_dataset.json"]
+        tools: ["Sanity Desk", "VS Code"]
+        depends_on: ["t_hi_fi_prototype"]
+        effort: "2d"
+        definition_of_done: "JSON dataset with names, descriptions, allergens, USD prices, INR equivalents, and assigned photo assets."
+      - id: "t_image_compression_pipeline"
+        title: "Next-Gen Image Format Pipeline"
+        description: "Compress all food and interior assets into responsive AVIF/WebP srcset widths (480w, 800w, 1200w, 1600w)."
+        owner_role: "Front-end Developer"
+        inputs: ["raw_assets_drive_folder"]
+        outputs: ["optimized_public_assets_folder"]
+        tools: ["Sharp CLI", "Squoosh"]
+        depends_on: ["t_menu_content_model"]
+        effort: "1d"
+        definition_of_done: "No hero banner exceeds 150KB; no food thumbnail exceeds 35KB; all images have verified aspect-ratio preservation."
+    exit_criteria: "Complete menu dataset verified and image assets compiled in high-performance web formats."
+
+  - id: "ph_frontend_dev"
+    name: "Development — Front End"
+    objective: "Build responsive, accessible Next.js user interfaces with instant filtering and cart capabilities."
+    owner_role: "Front-end Developer"
+    tasks:
+      - id: "t_scaffold_components"
+        title: "Next.js App Router Scaffold & UI Design System"
+        description: "Set up component architecture: Navbar, Footer, StickyCartBar, CategoryTabs, MenuItemCard, and StatusBanner."
+        owner_role: "Front-end Developer"
+        inputs: ["design_tokens.json", "hifi_prototype_clickable.fig"]
+        outputs: ["ui_component_library_code"]
+        tools: ["Next.js", "Tailwind CSS", "Radix UI Primitives"]
+        depends_on: ["t_image_compression_pipeline"]
+        effort: "3d"
+        definition_of_done: "Fully responsive, theme-switchable UI components with 100% adherence to design tokens."
+      - id: "t_ordering_experience"
+        title: "Menu Catalog, Filter & Customizer Sheet"
+        description: "Implement fast client-side category switching, search query filter, dietary tags (VG, V, GF), and modifier selection drawer."
+        owner_role: "Front-end Developer"
+        inputs: ["ui_component_library_code", "menu_seed_dataset.json"]
+        outputs: ["menu_feature_module_code"]
+        tools: ["Zustand", "Framer Motion"]
+        depends_on: ["t_scaffold_components"]
+        effort: "3.5d"
+        definition_of_done: "Category filtering executes under 50ms without re-render lag; modifier drawer updates total price dynamically."
+      - id: "t_cart_checkout_ui"
+        title: "Cart & 3-Step Checkout Interface"
+        description: "Develop line-item manager, smart combo upsells, fulfillment selector (Kerbside/Delivery), NYC tax calculator, and tip selector."
+        owner_role: "Front-end Developer"
+        inputs: ["menu_feature_module_code"]
+        outputs: ["checkout_ui_module_code"]
+        tools: ["React Hook Form", "Zod", "Tailwind CSS"]
+        depends_on: ["t_ordering_experience"]
+        effort: "2.5d"
+        definition_of_done: "Cart state persists in localStorage/Redis; form enforces phone/address validation before payment transition."
+    exit_criteria: "Complete frontend application routes render cleanly across all device viewport breakpoints."
+
+  - id: "ph_backend_cms"
+    name: "Development — Back End & CMS"
+    objective: "Deploy headless CMS schema, live store status control, order state engine, and order notifications."
+    owner_role: "Back-end Developer"
+    tasks:
+      - id: "t_cms_schema_deployment"
+        title: "Sanity CMS Content Schema & Studio Build"
+        description: "Define content schemas: MenuItem, Category, StoreSettings (Open/Closed/Temp-Closed toggle), AnnouncementBanner, and Review."
+        owner_role: "Back-end Developer"
+        inputs: ["menu_seed_dataset.json"]
+        outputs: ["sanity_studio_deployed_url", "sanity_schema_repo"]
+        tools: ["Sanity.io", "TypeScript"]
+        depends_on: ["t_scaffold_components"]
+        effort: "2.5d"
+        definition_of_done: "Cafe owner can edit any price, toggle item stock status, or change operating hours without redeploying code."
+      - id: "t_order_api_state"
+        title: "Order Lifecycle API & Webhook Service"
+        description: "Create idempotent /api/orders endpoint with state transitions: RECEIVED -> PREPARING -> READY -> COMPLETED / REFUNDED."
+        owner_role: "Back-end Developer"
+        inputs: ["checkout_ui_module_code"]
+        outputs: ["api_orders_handler_code", "redis_session_schema"]
+        tools: ["Next.js Route Handlers", "Upstash Redis", "Zod"]
+        depends_on: ["t_cms_schema_deployment"]
+        effort: "3d"
+        definition_of_done: "Tested order state machine rejects duplicate payment references and triggers push events on status change."
+    exit_criteria: "CMS studio operational and backend APIs validating requests, tracking orders, and handling error states."
+
+  - id: "ph_integrations"
+    name: "Integrations"
+    objective: "Connect Stripe payment gateway, Google Maps, transactional messaging, and social feeds."
+    owner_role: "Full-Stack Engineer"
+    tasks:
+      - id: "t_stripe_payment_element"
+        title: "Stripe Payment Element & Webhook Security"
+        description: "Integrate Stripe PaymentIntent creation, tokenized card element, Apple Pay, Google Pay, and cryptographic webhook signing."
+        owner_role: "Full-Stack Engineer"
+        inputs: ["api_orders_handler_code", "stripe_credentials"]
+        outputs: ["stripe_integration_module.ts", "stripe_webhook_handler.ts"]
+        tools: ["Stripe Node SDK", "Stripe CLI"]
+        depends_on: ["t_order_api_state", "t_cart_checkout_ui"]
+        effort: "2.5d"
+        definition_of_done: "Zero raw card data touches server; automated test confirms orders only generate upon payment_intent.succeeded webhook."
+      - id: "t_maps_notifications"
+        title: "Google Maps Embed & Resend Order Notification Service"
+        description: "Embed interactive map for 90 Chambers St Tribeca, tap-to-call link, and configure HTML transactional email order receipts."
+        owner_role: "Full-Stack Engineer"
+        inputs: ["stripe_integration_module.ts"]
+        outputs: ["maps_component_code", "email_notification_service.ts"]
+        tools: ["Google Maps Embed API", "Resend API", "React Email"]
+        depends_on: ["t_stripe_payment_element"]
+        effort: "1.5d"
+        definition_of_done: "Confirmed test order triggers automated branded email receipt with pickup instructions within 5 seconds."
+    exit_criteria: "Live test charges successfully cleared through payment gateway and maps/email dispatches confirmed."
+
+  - id: "ph_seo_performance"
+    name: "SEO & Performance Optimization"
+    objective: "Maximize organic Tribeca visibility and attain sub-2.5s mobile LCP on production CDN."
+    owner_role: "SEO & Performance Specialist"
+    tasks:
+      - id: "t_schema_structured_data"
+        title: "Restaurant & Menu JSON-LD Schema Architecture"
+        description: "Implement schema.org/Restaurant, LocalBusiness, Menu, and GeoCoordinates metadata reflecting 90 Chambers St Unit B NYC."
+        owner_role: "SEO & Performance Specialist"
+        inputs: ["sitemap_spec.json", "menu_seed_dataset.json"]
+        outputs: ["structured_data_snippets.jsonld", "robots.txt", "sitemap.xml"]
+        tools: ["Google Rich Results Test", "Schema Markup Generator"]
+        depends_on: ["t_maps_notifications"]
+        effort: "1.5d"
+        definition_of_done: "Rich Results Test verifies 0 errors and 0 warnings for Restaurant and Menu entities."
+      - id: "t_core_web_vitals"
+        title: "Core Web Vitals & Edge Caching Optimization"
+        description: "Audit bundle sizes, inline critical fonts, implement font-display: swap, and configure Vercel edge stale-while-revalidate caching."
+        owner_role: "Front-end Developer"
+        inputs: ["optimized_public_assets_folder", "structured_data_snippets.jsonld"]
+        outputs: ["performance_tuning_patch.diff", "lighthouse_ci_report.json"]
+        tools: ["Google Lighthouse CI", "WebPageTest", "Chrome DevTools"]
+        depends_on: ["t_schema_structured_data"]
+        effort: "2d"
+        definition_of_done: "Mobile Lighthouse Performance score >= 92; LCP < 2.2s on throttled mobile 4G; total JavaScript payload < 160KB gzip."
+    exit_criteria: "All rich schema validated without error and Core Web Vitals thresholds achieved on staging URL."
+
+  - id: "ph_analytics_tracking"
+    name: "Analytics & Conversion Tracking"
+    objective: "Implement privacy-compliant telemetry, funnel tracking, and operational dashboard."
+    owner_role: "Analytics Engineer"
+    tasks:
+      - id: "t_ga4_funnel_setup"
+        title: "GA4 E-commerce Event Pipeline & GTM Container"
+        description: "Configure events: view_item, add_to_cart, begin_checkout, add_payment_info, purchase, click_to_call, and get_directions."
+        owner_role: "Analytics Engineer"
+        inputs: ["t_checkout_ui_module_code", "sitemap_spec.json"]
+        outputs: ["gtm_container_export.json", "analytics_spec_doc.md"]
+        tools: ["Google Tag Manager", "Google Analytics 4", "Tag Assistant"]
+        depends_on: ["t_core_web_vitals"]
+        effort: "1.5d"
+        definition_of_done: "DebugView confirms accurate monetary value, currency codes, and custom parameters on test checkout."
+      - id: "t_owner_analytics_dashboard"
+        title: "Executive Order & Sales Dashboard"
+        description: "Create real-time operational dashboard visualizing daily order count, average order value, top dishes, and peak pickup hours."
+        owner_role: "Analytics Engineer"
+        inputs: ["t_ga4_funnel_setup"]
+        outputs: ["looker_studio_dashboard_url"]
+        tools: ["Looker Studio", "Google Analytics 4 Connector"]
+        depends_on: ["t_ga4_funnel_setup"]
+        effort: "1d"
+        definition_of_done: "Interactive dashboard delivers automated weekly sales summary report to cafe owner's email."
+    exit_criteria: "100% of e-commerce funnel events firing accurately in staging with zero discrepancy in order revenue reporting."
+
+  - id: "ph_qa_accessibility"
+    name: "QA & Accessibility"
+    objective: "Verify functional integrity, security posture, cross-browser parity, and WCAG 2.1 AA compliance."
+    owner_role: "Lead QA Engineer"
+    tasks:
+      - id: "t_accessibility_wcag_audit"
+        title: "WCAG 2.1 AA Accessibility Audit & Remediation"
+        description: "Validate full keyboard navigation, screen-reader semantics (VoiceOver/TalkBack), color contrast, and 48px touch targets."
+        owner_role: "Accessibility Auditor"
+        inputs: ["ui_component_library_code"]
+        outputs: ["accessibility_audit_report.md", "a11y_fixes_patch.diff"]
+        tools: ["axe DevTools", "WAVE Evaluation Tool", "NVDA", "VoiceOver"]
+        depends_on: ["t_analytics_tracking"]
+        effort: "1.5d"
+        definition_of_done: "0 automated axe violations; complete checkout achievable without mouse input; screen-reader announces price changes."
+      - id: "t_cross_device_e2e_testing"
+        title: "End-to-End Functional & Cross-Device Test Suite"
+        description: "Execute automated and manual regression tests across iOS Safari, Android Chrome, MacOS Safari, and Windows Chrome."
+        owner_role: "Lead QA Engineer"
+        inputs: ["stripe_integration_module.ts", "t_accessibility_wcag_audit"]
+        outputs: ["test_execution_matrix.md", "playwright_suite_reports"]
+        tools: ["Playwright", "BrowserStack"]
+        depends_on: ["t_accessibility_wcag_audit"]
+        effort: "2d"
+        definition_of_done: "100% automated test pass rate for Cart -> Modifier -> Checkout -> Order Status flow on 8 device profiles."
+    exit_criteria: "Zero critical or high-severity defects; WCAG 2.1 AA conformity verified and certified."
+
+  - id: "ph_launch_golive"
+    name: "Launch & Go-Live"
+    objective: "Execute zero-downtime production cutover, DNS routing, SSL provisioning, and live test transaction."
+    owner_role: "DevOps & Launch Lead"
+    tasks:
+      - id: "t_dns_ssl_cutover"
+        title: "Production DNS, SSL & Security Headers Deployment"
+        description: "Configure apex domain and www CNAME records, provision TLS certificate, and enforce HSTS, CSP, and X-Content-Type headers."
+        owner_role: "DevOps & Launch Lead"
+        inputs: ["domain_registrar_access", "vercel_production_target"]
+        outputs: ["production_live_dns_record.txt", "security_headers_scan.json"]
+        tools: ["Cloudflare DNS", "Vercel CLI", "securityheaders.com"]
+        depends_on: ["t_cross_device_e2e_testing"]
+        effort: "1d"
+        definition_of_done: "Live HTTPS resolution with A+ grade on securityheaders.com and verified 301 redirect from HTTP to HTTPS."
+      - id: "t_live_smoke_test"
+        title: "Production Smoke Test & Real-Money Transaction Validation"
+        description: "Execute real-money $1.00 transaction via Apple Pay and credit card, verifying kitchen alert, receipt email, and refund mechanism."
+        owner_role: "Lead QA Engineer"
+        inputs: ["production_live_dns_record.txt"]
+        outputs: ["go_live_signoff_certificate.pdf"]
+        tools: ["Stripe Dashboard", "Live Production Browser"]
+        depends_on: ["t_dns_ssl_cutover"]
+        effort: "0.5d"
+        definition_of_done: "Successful production order placed, tracked, completed, and subsequent test refund processed cleanly."
+    exit_criteria: "Production URL live, indexed, secure, and processing live transactions with zero errors."
+
+  - id: "ph_postlaunch_growth"
+    name: "Post-Launch Growth"
+    objective: "Optimize local search visibility, gather reviews, and establish operational update routines."
+    owner_role: "Growth Marketer"
+    tasks:
+      - id: "t_gbp_local_sync"
+        title: "Google Business Profile & Apple Maps Connect Optimization"
+        description: "Link new website URL and menu link directly in Google Business Profile, Apple Maps, Yelp, and Bing Places for 90 Chambers St."
+        owner_role: "Growth Marketer"
+        inputs: ["production_live_dns_record.txt", "structured_data_snippets.jsonld"]
+        outputs: ["gbp_audit_confirmation.png", "local_citation_tracker.csv"]
+        tools: ["Google Business Profile Manager", "Apple Business Connect"]
+        depends_on: ["t_live_smoke_test"]
+        effort: "1d"
+        definition_of_done: "Google Maps profile features verified 'Order Online' button redirecting to website with UTM tracking parameters."
+      - id: "t_review_reputation_cadence"
+        title: "Automated Review Collection & Staff Handover"
+        description: "Implement post-order feedback loop, QR code counter display stands for Google Reviews, and conduct 2-hour staff CMS training."
+        owner_role: "Growth Marketer"
+        inputs: ["gbp_audit_confirmation.png"]
+        outputs: ["counter_qr_stand_print_ready.pdf", "staff_cms_handbook.pdf"]
+        tools: ["Canva", "Loom", "Sanity Studio"]
+        depends_on: ["t_gbp_local_sync"]
+        effort: "1.5d"
+        definition_of_done: "Cafe staff independently demonstrates price adjustment and order status updates on live site; QR assets delivered."
+    exit_criteria: "Staff training completed and automated growth loops actively generating local Google reviews."
+
+dependencies:
+  - from: "ph_discovery"
+    to: "ph_brand_content"
+  - from: "ph_brand_content"
+    to: "ph_ux_design"
+  - from: "ph_ux_design"
+    to: "ph_content_production"
+  - from: "ph_content_production"
+    to: "ph_frontend_dev"
+  - from: "ph_frontend_dev"
+    to: "ph_backend_cms"
+  - from: "ph_backend_cms"
+    to: "ph_integrations"
+  - from: "ph_integrations"
+    to: "ph_seo_performance"
+  - from: "ph_seo_performance"
+    to: "ph_analytics_tracking"
+  - from: "ph_analytics_tracking"
+    to: "ph_qa_accessibility"
+  - from: "ph_qa_accessibility"
+    to: "ph_launch_golive"
+  - from: "ph_launch_golive"
+    to: "ph_postlaunch_growth"
+
+deliverables:
+  - id: "d_sitemap"
+    phase: "ph_discovery"
+    artifact: "Approved Information Architecture & Route Sitemap"
+  - id: "d_brand_tokens"
+    phase: "ph_brand_content"
+    artifact: "Design Tokens & WCAG-Compliant Color Palette Specification"
+  - id: "d_ui_prototype"
+    phase: "ph_ux_design"
+    artifact: "Figma High-Fidelity Clickable Mobile & Desktop Prototype"
+  - id: "d_menu_data"
+    phase: "ph_content_production"
+    artifact: "Normalized 45-Item Menu Database with AVIF/WebP Media Assets"
+  - id: "d_web_application"
+    phase: "ph_frontend_dev"
+    artifact: "Next.js Responsive Front-End Codebase in GitHub Repository"
+  - id: "d_cms_studio"
+    phase: "ph_backend_cms"
+    artifact: "Sanity Studio CMS with Live Store Status & Pricing Controls"
+  - id: "d_payment_gateway"
+    phase: "ph_integrations"
+    artifact: "Stripe Payment Element & Cryptographic Webhook Microservice"
+  - id: "d_seo_schema"
+    phase: "ph_seo_performance"
+    artifact: "Restaurant & Menu JSON-LD Schema with Verified Rich Results"
+  - id: "d_analytics_pipeline"
+    phase: "ph_analytics_tracking"
+    artifact: "GA4 E-commerce Telemetry & Looker Studio Executive Dashboard"
+  - id: "d_qa_signoff"
+    phase: "ph_qa_accessibility"
+    artifact: "WCAG 2.1 AA Compliance Certification & Playwright Test Suite"
+  - id: "d_live_platform"
+    phase: "ph_launch_golive"
+    artifact: "Production Website Deployed on Custom Domain with HTTPS"
+  - id: "d_growth_playbook"
+    phase: "ph_postlaunch_growth"
+    artifact: "Staff Operational Handbook & Synced Google Business Profile"
+
+quality_gates:
+  - id: "qg_perf_lcp"
+    metric: "Largest Contentful Paint (LCP)"
+    threshold: "<= 2.2 seconds on throttled 4G mobile emulation"
+    gate: "ph_seo_performance"
+  - id: "qg_perf_cls"
+    metric: "Cumulative Layout Shift (CLS)"
+    threshold: "<= 0.05 on all responsive viewport resolutions"
+    gate: "ph_seo_performance"
+  - id: "qg_accessibility_score"
+    metric: "Lighthouse Accessibility Score"
+    threshold: ">= 95/100 and zero automated axe-core violations"
+    gate: "ph_qa_accessibility"
+  - id: "qg_contrast_ratio"
+    metric: "Color Contrast Ratio"
+    threshold: ">= 4.5:1 for body copy; >= 3.0:1 for large display headers"
+    gate: "ph_brand_content"
+  - id: "qg_js_budget"
+    metric: "First Load JavaScript Bundle Size"
+    threshold: "<= 160 KB compressed (gzip/brotli)"
+    gate: "ph_frontend_dev"
+  - id: "qg_schema_validity"
+    metric: "Structured Data Validation"
+    threshold: "100% pass on Google Rich Results Test (0 warnings, 0 errors)"
+    gate: "ph_seo_performance"
+  - id: "qg_payment_idempotency"
+    metric: "Payment Idempotency & Webhook Signing"
+    threshold: "100% duplicate charge prevention on simulated network retries"
+    gate: "ph_integrations"
+  - id: "qg_touch_target_size"
+    metric: "Minimum Touch Target Size"
+    threshold: ">= 48px x 48px on all mobile interactive elements"
+    gate: "ph_ux_design"
+
+kpis:
+  - id: "kpi_order_conversion_rate"
+    name: "Online Order Checkout Conversion Rate"
+    target: ">= 4.2%"
+    unit: "percentage of menu visitors"
+    tracking_method: "GA4 e-commerce funnel: session_start to purchase"
+  - id: "kpi_mobile_lcp"
+    name: "Mobile Largest Contentful Paint (LCP)"
+    target: "<= 2.2"
+    unit: "seconds"
+    tracking_method: "Google Chrome User Experience Report (CrUX) & PageSpeed"
+  - id: "kpi_lighthouse_performance"
+    name: "Mobile Lighthouse Performance Score"
+    target: ">= 92"
+    unit: "score out of 100"
+    tracking_method: "CI automated Lighthouse audits on Vercel deployment"
+  - id: "kpi_lighthouse_accessibility"
+    name: "Lighthouse Accessibility Score"
+    target: ">= 98"
+    unit: "score out of 100"
+    tracking_method: "Continuous axe-core integration test in Playwright"
+  - id: "kpi_local_organic_impressions"
+    name: "Local Google Search Impressions"
+    target: ">= 15,000"
+    unit: "monthly impressions"
+    tracking_method: "Google Search Console (Query filters: 'Tribeca cafe', 'Artesano cafe')"
+  - id: "kpi_directions_clicks"
+    name: "Get Directions & Navigation Intent Clicks"
+    target: ">= 350"
+    unit: "clicks per month"
+    tracking_method: "GA4 custom event: get_directions_click"
+  - id: "kpi_click_to_call"
+    name: "Direct Call Inquiries"
+    target: ">= 180"
+    unit: "taps per month"
+    tracking_method: "GA4 custom event: click_to_call"
+  - id: "kpi_average_order_value"
+    name: "Average Order Value (AOV)"
+    target: ">= 18.50"
+    unit: "USD ($)"
+    tracking_method: "Stripe Dashboard analytics & GA4 purchase average value"
+  - id: "kpi_cart_abandonment_rate"
+    name: "Shopping Cart Abandonment Rate"
+    target: "<= 55"
+    unit: "percentage"
+    tracking_method: "GA4 checkout abandonment funnel: begin_checkout to purchase"
+
+risks:
+  - id: "r_menu_price_desync"
+    description: "Cafe changes prices or runs out of baked goods without developer availability."
+    mitigation: "Sanity CMS instant schema with real-time webhooks allowing floor staff to toggle stock from mobile browser in 10 seconds."
+    severity: "high"
+  - id: "r_morning_menu_confusion"
+    description: "Customers order morning-only items outside 8:00 AM - 11:00 AM window causing kitchen operational bottlenecks."
+    mitigation: "Automated scheduler logic dynamically grays out morning specials outside 8-11 AM with scheduling modal for next-day pickup."
+    severity: "medium"
+  - id: "r_payment_webhook_drops"
+    description: "Network flakiness causes dropped Stripe webhooks, leading to unrecorded customer charges."
+    mitigation: "Redis-backed idempotent webhook listener with automated retry queue and client-side fallback polling."
+    severity: "critical"
+  - id: "r_local_seo_duplication"
+    description: "Conflicting citations on Google Maps, Apple Maps, and legacy directories causing local rank suppression."
+    mitigation: "Strict NAP (Name, Address, Phone) consistency audit across all aggregators during Phase 12."
+    severity: "medium"
+
+launch_checklist:
+  - "DNS apex and www CNAME records pointed to Vercel Edge Network"
+  - "Automated SSL/TLS certificate provisioned and auto-renewing"
+  - "HSTS, CSP, and X-Content-Type-Options security headers configured with A+ grade"
+  - "Stripe Live API keys rotated into production environment variables"
+  - "Stripe webhook endpoint active, signed, and tested against live endpoint"
+  - "Store open/closed and temporary closed status switch confirmed operational in CMS"
+  - "Morning menu scheduler validated against America/New_York (EST/EDT) system clock"
+  - "XML sitemap and robots.txt verified and submitted to Google Search Console"
+  - "Restaurant and Menu schema.org JSON-LD validated on Google Rich Results Test"
+  - "Google Business Profile primary website link and menu URL updated with UTM parameters"
+  - "Google Analytics 4 e-commerce events and conversion tags logging in DebugView"
+  - "Transactional email notifications via Resend firing with branded HTML receipts"
+  - "Touch targets meet minimum 48px size standard across mobile views"
+  - "All product images compressed in modern AVIF/WebP formats with descriptive alt text"
+  - "Test order executed end-to-end with real payment card and refunded successfully"
+  - "Cafe management staff trained on CMS price updates and daily order management"
