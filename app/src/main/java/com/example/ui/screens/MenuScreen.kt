@@ -40,6 +40,7 @@ fun MenuScreen(
   onItemClick: (MenuItem) -> Unit,
   onQuickAdd: (MenuItem) -> Unit,
   onToggleFavorite: (String) -> Unit,
+  onEditItem: (MenuItem) -> Unit = {},
   modifier: Modifier = Modifier
 ) {
   // Filter items
@@ -238,7 +239,8 @@ fun MenuScreen(
             isFavorite = favorites.contains(item.id),
             onItemClick = { onItemClick(item) },
             onQuickAdd = { onQuickAdd(item) },
-            onToggleFavorite = { onToggleFavorite(item.id) }
+            onToggleFavorite = { onToggleFavorite(item.id) },
+            onEditItem = { onEditItem(item) }
           )
         }
       }

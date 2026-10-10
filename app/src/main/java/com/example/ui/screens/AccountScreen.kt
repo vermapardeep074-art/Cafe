@@ -37,6 +37,8 @@ fun AccountScreen(
   onItemClick: (MenuItem) -> Unit,
   onQuickAdd: (MenuItem) -> Unit,
   onToggleFavorite: (String) -> Unit,
+  onOpenAdmin: () -> Unit = {},
+  onEditItem: (MenuItem) -> Unit = {},
   modifier: Modifier = Modifier
 ) {
   val favoriteItems = menuItems.filter { favorites.contains(it.id) }
@@ -168,6 +170,81 @@ fun AccountScreen(
       }
     }
 
+    // 2B. Owner & Staff Administration
+    item {
+      Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                imageVector = Icons.Default.AdminPanelSettings,
+                contentDescription = null,
+                tint = WarmCaramel,
+                modifier = Modifier.size(22.dp)
+              )
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                text = "CAFE OWNER PORTAL",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                letterSpacing = 1.sp
+              )
+            }
+            Surface(
+              shape = RoundedCornerShape(4.dp),
+              color = LeafGreenDark.copy(alpha = 0.15f)
+            ) {
+              Text(
+                text = "PIN: 1234",
+                style = MaterialTheme.typography.labelSmall,
+                color = LeafGreenDark,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+              )
+            }
+          }
+
+          Spacer(modifier = Modifier.height(10.dp))
+
+          Text(
+            text = "Live Menu, Price & Banner CMS",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+          )
+          Text(
+            text = "Update photography, edit prices, mark stock availability, manage kitchen orders, and modify website banners.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+          )
+
+          Spacer(modifier = Modifier.height(14.dp))
+
+          Button(
+            onClick = onOpenAdmin,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+              containerColor = WarmCaramel,
+              contentColor = PureWhite
+            ),
+            shape = RoundedCornerShape(12.dp)
+          ) {
+            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Launch Visual Admin CMS", fontWeight = FontWeight.Bold)
+          }
+        }
+      }
+    }
+
     // 3. Past Orders & Reorder
     item {
       Text(
@@ -257,7 +334,8 @@ fun AccountScreen(
           isFavorite = true,
           onItemClick = { onItemClick(item) },
           onQuickAdd = { onQuickAdd(item) },
-          onToggleFavorite = { onToggleFavorite(item.id) }
+          onToggleFavorite = { onToggleFavorite(item.id) },
+          onEditItem = { onEditItem(item) }
         )
       }
     }

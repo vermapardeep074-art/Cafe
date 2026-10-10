@@ -25,7 +25,11 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
+      val context = androidx.compose.ui.platform.LocalContext.current
       val viewModel: ArtesanoViewModel = viewModel()
+      LaunchedEffect(Unit) {
+        viewModel.setContext(context)
+      }
       val settings by viewModel.settings.collectAsStateWithLifecycle()
 
       ArtesanoTheme(darkTheme = settings.darkTheme) {
@@ -62,6 +66,7 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
   val selectedTipPercent by viewModel.selectedTipPercent.collectAsStateWithLifecycle()
   val selectedPaymentMethod by viewModel.selectedPaymentMethod.collectAsStateWithLifecycle()
   val isAdminAuthenticated by viewModel.isAdminAuthenticated.collectAsStateWithLifecycle()
+  val targetEditItemId by viewModel.targetEditItemId.collectAsStateWithLifecycle()
   val notification by viewModel.notification.collectAsStateWithLifecycle()
 
   val snackbarHostState = remember { SnackbarHostState() }
@@ -98,6 +103,9 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
         storeStatus = settings.status,
         activeCurrency = settings.activeCurrency,
         darkTheme = settings.darkTheme,
+        customLogoUri = settings.customLogoUri,
+        announcementText = settings.announcementText,
+        announcementActive = settings.announcementActive,
         onNavigate = { viewModel.navigateTo(it) },
         onToggleCurrency = { viewModel.toggleCurrency() },
         onToggleTheme = { viewModel.toggleTheme() },
@@ -149,7 +157,9 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
             onViewMorningMenu = {
               viewModel.selectCategory(MenuCategory.MORNING)
               viewModel.navigateTo(AppDestination.MENU)
-            }
+            },
+            onOpenAdmin = { viewModel.navigateTo(AppDestination.ADMIN) },
+            onEditItem = { viewModel.openAdminForDish(it.id) }
           )
         }
 
@@ -166,7 +176,8 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
             onSelectDietaryTag = { viewModel.selectDietaryTag(it) },
             onItemClick = { viewModel.openDetail(it) },
             onQuickAdd = { viewModel.addToCart(it) },
-            onToggleFavorite = { viewModel.toggleFavorite(it) }
+            onToggleFavorite = { viewModel.toggleFavorite(it) },
+            onEditItem = { viewModel.openAdminForDish(it.id) }
           )
         }
 
@@ -248,7 +259,9 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
             onTrackOrder = { viewModel.trackOrder(it) },
             onItemClick = { viewModel.openDetail(it) },
             onQuickAdd = { viewModel.addToCart(it) },
-            onToggleFavorite = { viewModel.toggleFavorite(it) }
+            onToggleFavorite = { viewModel.toggleFavorite(it) },
+            onOpenAdmin = { viewModel.navigateTo(AppDestination.ADMIN) },
+            onEditItem = { viewModel.openAdminForDish(it.id) }
           )
         }
 
@@ -272,7 +285,17 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
             onRefundOrder = { id, reason -> viewModel.refundOrder(id, reason) },
             onUpdateStoreContact = { phone, address, hours, morningHours ->
               viewModel.updateStoreContact(phone, address, hours, morningHours)
-            }
+            },
+            onUploadDishPhoto = { itemId, uri -> viewModel.uploadDishPhoto(itemId, uri) },
+            onReorderMenuItem = { itemId, moveUp -> viewModel.reorderDish(itemId, moveUp) },
+            onUpdateBannerAndTheme = { headline, subheadline, announcement, announcementActive, darkTheme ->
+              viewModel.updateBannerAndTheme(headline, subheadline, announcement, announcementActive, darkTheme)
+            },
+            onUploadCustomLogo = { uri -> viewModel.uploadCustomLogo(uri) },
+            onUploadCustomBanner = { uri -> viewModel.uploadCustomBanner(uri) },
+            onResetDefaults = { viewModel.resetMenuDefaults() },
+            targetEditItemId = targetEditItemId,
+            onClearTargetEditItem = { viewModel.clearTargetEditItem() }
           )
         }
       }
@@ -283,6 +306,7 @@ fun ArtesanoApp(viewModel: ArtesanoViewModel) {
           item = item,
           activeCurrency = settings.activeCurrency,
           onDismiss = { viewModel.closeDetail() },
+          onEditInAdmin = { viewModel.openAdminForDish(it.id) },
           onAddToCart = { qty, size, sAddon, milk, mAddon, extras, notes ->
             viewModel.addToCart(item, qty, size, sAddon, milk, mAddon, extras, notes)
           }

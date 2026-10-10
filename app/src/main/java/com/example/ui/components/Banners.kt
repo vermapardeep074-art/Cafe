@@ -204,7 +204,7 @@ fun ArtesanoBottomNav(
       Triple(AppDestination.MENU, "Menu", Icons.Default.RestaurantMenu to Icons.Outlined.RestaurantMenu),
       Triple(AppDestination.CART, "Cart", Icons.Default.ShoppingBag to Icons.Outlined.ShoppingBag),
       Triple(AppDestination.TRACKING, "Track", Icons.Default.LocalShipping to Icons.Outlined.LocalShipping),
-      Triple(AppDestination.ABOUT, "About", Icons.Default.Storefront to Icons.Outlined.Storefront),
+      Triple(AppDestination.ADMIN, "Admin", Icons.Default.AdminPanelSettings to Icons.Outlined.AdminPanelSettings),
       Triple(AppDestination.ACCOUNT, "Account", Icons.Default.Person to Icons.Outlined.Person)
     )
 

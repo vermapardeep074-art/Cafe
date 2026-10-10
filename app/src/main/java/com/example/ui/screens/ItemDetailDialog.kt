@@ -10,7 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +38,7 @@ fun ItemDetailDialog(
   item: MenuItem,
   activeCurrency: Currency,
   onDismiss: () -> Unit,
+  onEditInAdmin: ((MenuItem) -> Unit)? = null,
   onAddToCart: (
     quantity: Int,
     size: String,
@@ -115,12 +118,23 @@ fun ItemDetailDialog(
               .fillMaxWidth()
               .height(200.dp)
           ) {
-            Image(
-              painter = painterResource(id = item.imageRes),
-              contentDescription = item.name,
-              modifier = Modifier.fillMaxSize(),
-              contentScale = ContentScale.Crop
-            )
+            if (!item.imageUri.isNullOrEmpty()) {
+              coil.compose.AsyncImage(
+                model = item.imageUri,
+                contentDescription = item.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = item.imageRes),
+                error = painterResource(id = item.imageRes)
+              )
+            } else {
+              Image(
+                painter = painterResource(id = item.imageRes),
+                contentDescription = item.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+              )
+            }
 
             IconButton(
               onClick = onDismiss,
@@ -369,6 +383,34 @@ fun ItemDetailDialog(
               Text(
                 text = "Add · ${activeCurrency.format(totalPrice)}",
                 style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+              )
+            }
+          }
+
+          // Owner Admin Direct Edit Button
+          if (onEditInAdmin != null) {
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedButton(
+              onClick = { onEditInAdmin(item) },
+              modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .testTag("dialog_edit_dish_btn"),
+              shape = RoundedCornerShape(12.dp),
+              colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = WarmCaramel
+              )
+            ) {
+              Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Text(
+                text = "Owner Edit: Change Photo, Price or Stock",
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold
               )
             }

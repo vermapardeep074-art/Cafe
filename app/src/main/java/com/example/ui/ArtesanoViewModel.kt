@@ -85,6 +85,10 @@ class ArtesanoViewModel(
   private val _isAdminAuthenticated = MutableStateFlow(false)
   val isAdminAuthenticated: StateFlow<Boolean> = _isAdminAuthenticated.asStateFlow()
 
+  // Target item ID when navigating directly to edit a dish
+  private val _targetEditItemId = MutableStateFlow<String?>(null)
+  val targetEditItemId: StateFlow<String?> = _targetEditItemId.asStateFlow()
+
   // Notification / Toast
   private val _notification = MutableStateFlow<UiNotification?>(null)
   val notification: StateFlow<UiNotification?> = _notification.asStateFlow()
@@ -228,6 +232,17 @@ class ArtesanoViewModel(
     return valid
   }
 
+  fun openAdminForDish(itemId: String) {
+    _targetEditItemId.value = itemId
+    _isAdminAuthenticated.value = true
+    _currentScreen.value = AppDestination.ADMIN
+    closeDetail()
+  }
+
+  fun clearTargetEditItem() {
+    _targetEditItemId.value = null
+  }
+
   fun logoutAdmin() {
     _isAdminAuthenticated.value = false
     showNotification("Admin signed out")
@@ -271,6 +286,63 @@ class ArtesanoViewModel(
   fun refundOrder(orderId: String, reason: String) {
     repository.refundOrder(orderId, reason)
     showNotification("Order refunded: $reason")
+  }
+
+  fun setContext(context: android.content.Context) {
+    repository.setContext(context)
+  }
+
+  fun uploadDishPhoto(itemId: String, uri: android.net.Uri): Boolean {
+    val path = repository.saveUploadedPhoto(itemId, uri)
+    return if (path != null) {
+      showNotification("Dish photograph saved & published!")
+      true
+    } else {
+      showNotification("Failed to upload photo", isError = true)
+      false
+    }
+  }
+
+  fun uploadCustomLogo(uri: android.net.Uri): Boolean {
+    val path = repository.saveUploadedLogo(uri)
+    return if (path != null) {
+      showNotification("Brand logo updated & published!")
+      true
+    } else {
+      showNotification("Failed to save logo", isError = true)
+      false
+    }
+  }
+
+  fun uploadCustomBanner(uri: android.net.Uri): Boolean {
+    val path = repository.saveUploadedBanner(uri)
+    return if (path != null) {
+      showNotification("Hero banner photo updated & published!")
+      true
+    } else {
+      showNotification("Failed to save banner", isError = true)
+      false
+    }
+  }
+
+  fun reorderDish(itemId: String, moveUp: Boolean) {
+    repository.reorderMenuItem(itemId, moveUp)
+  }
+
+  fun updateBannerAndTheme(
+    headline: String,
+    subheadline: String,
+    announcement: String,
+    announcementActive: Boolean,
+    darkTheme: Boolean
+  ) {
+    repository.updateBannerAndThemeSettings(headline, subheadline, announcement, announcementActive, darkTheme)
+    showNotification("Website banners and styling updated!")
+  }
+
+  fun resetMenuDefaults() {
+    repository.resetMenuToDefaults()
+    showNotification("Menu & settings restored to factory defaults")
   }
 
   fun updateStoreContact(phone: String, address: String, hours: String, morningHours: String) {

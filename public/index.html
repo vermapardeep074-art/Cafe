@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artesano Cafe — Tribeca, New York</title>
+  <meta name="description" content="Artisan neighbourhood café & bakery in Tribeca, NYC. Fresh · Bright · Plant-Filled · Homemade · Daily. Handcrafted espresso, morning menu, freshly baked pastries, and seamless ordering.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --espresso: #2A1E17;
+      --charcoal: #121212;
+      --caramel: #B9793A;
+      --gold: #D9B36C;
+      --cream: #F6F1E7;
+      --white: #FFFFFF;
+      --leaf-green: #7A8B6F;
+      --open-green: #2E7D32;
+      --closed-red: #C62828;
+      --temp-amber: #E65100;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.6;
+      padding-bottom: 70px;
+    }
+    h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+    header {
+      background: var(--white);
+      border-bottom: 1px solid rgba(217, 179, 108, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .status-bar {
+      padding: 6px 16px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--white);
+      display: block;
+    }
+    .status-open { background: var(--open-green); }
+    .status-closed { background: var(--closed-red); }
+    .status-temp { background: var(--temp-amber); }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--espresso);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 20px;
+      overflow: hidden;
+    }
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .brand-text h1 {
+      font-size: 20px;
+      letter-spacing: 1.5px;
+      color: var(--espresso);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-text p {
+      font-size: 11px;
+      color: var(--caramel);
+      font-weight: 600;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--caramel);
+      color: var(--white);
+    }
+    .btn-primary:hover {
+      background: #a3662d;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--espresso);
+      color: var(--espresso);
+    }
+    .btn-admin {
+      background: #2A1E17;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+    }
+    .btn-admin:hover {
+      background: #1a120d;
+      color: #fff;
+    }
+    .btn-edit-mode {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+    .btn-edit-mode.active {
+      background: #2e7d32;
+      color: #fff;
+    }
+    .hero {
+      position: relative;
+      background: linear-gradient(rgba(42, 30, 23, 0.85), rgba(18, 18, 18, 0.9)), url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;
+      color: var(--white);
+      padding: 80px 20px 70px;
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 40px;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .hero p {
+      font-size: 17px;
+      color: var(--gold);
+      max-width: 680px;
+      margin: 0 auto 24px;
+    }
+    .morning-pill {
+      display: inline-block;
+      background: rgba(217, 179, 108, 0.25);
+      border: 1px solid var(--gold);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      color: var(--white);
+    }
+    .main-content {
+      max-width: 1200px;
+      margin: 36px auto;
+      padding: 0 20px;
+    }
+    .owner-cms-banner {
+      background: #FFFFFF;
+      border: 1px solid rgba(185, 121, 58, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .owner-cms-text h3 {
+      font-size: 16px;
+      color: var(--espresso);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .owner-cms-text p {
+      font-size: 13px;
+      color: #666;
+    }
+    .badge-cms {
+      background: rgba(46, 125, 50, 0.12);
+      color: #2E7D32;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .section-title {
+      font-size: 28px;
+      color: var(--espresso);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: var(--caramel);
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+    .menu-card {
+      background: var(--white);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(217, 179, 108, 0.25);
+      box-shadow: 0 4px 14px rgba(42, 30, 23, 0.05);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .menu-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(42, 30, 23, 0.08);
+    }
+    .card-img {
+      height: 180px;
+      background: #e8e2d7;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--caramel);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .card-stock-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--closed-red);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 6px;
+      border-radius: 4px;
+    }
+    .card-edit-overlay-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(42, 30, 23, 0.88);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(217, 179, 108, 0.5);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .card-edit-overlay-btn:hover {
+      background: var(--espresso);
+      color: var(--white);
+    }
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-body h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: var(--espresso);
+    }
+    .card-body p {
+      font-size: 13px;
+      color: #666;
+      flex-grow: 1;
+      margin-bottom: 14px;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #f0eae1;
+      padding-top: 12px;
+      gap: 8px;
+    }
+    .price {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--caramel);
+    }
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn-edit-dish {
+      background: #fdf5ed;
+      color: var(--caramel);
+      border: 1px solid rgba(185, 121, 58, 0.4);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-edit-dish:hover {
+      background: var(--caramel);
+      color: white;
+    }
+    /* Floating action dock */
+    .floating-admin-dock {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--espresso);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+      z-index: 99;
+      border: 1px solid var(--gold);
+    }
+    .floating-admin-dock a {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
+    }
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 18, 18, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal-content {
+      background: var(--white);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      color: var(--espresso);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: #444;
+    }
+    .form-control {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .preview-thumb {
+      width: 100%;
+      height: 140px;
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      background-color: #eee;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--espresso);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+      z-index: 1001;
+      border: 1px solid var(--gold);
+    }
+    footer {
+      background: var(--espresso);
+      color: var(--white);
+      padding: 50px 20px 30px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div id="statusBanner" class="status-bar status-open">
+    OPEN NOW · 7:30 AM – 6:00 PM · TRIBECA NYC
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="brand">
+        <div class="brand-logo" id="logoText">A</div>
+        <div class="brand-text">
+          <h1 id="siteTitle">ARTESANO CAFE</h1>
+          <p id="siteTagline">Ristorante Italiano · Tribeca</p>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button id="btnToggleEditMode" class="btn btn-edit-mode" onclick="toggleEditMode()">
+          ✏️ Visual Editor Mode: <span id="editModeLabel">OFF</span>
+        </button>
+        <button class="btn btn-outline" onclick="openBannerModal()">Edit Banners</button>
+        <a href="/admin" class="btn btn-admin">⚙️ Full Admin Panel</a>
+        <a href="#menu" class="btn btn-primary">Explore Menu</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="heroSection">
+    <div class="morning-pill" id="morningWindow">Morning Menu Served Daily 8:00 AM – 11:00 AM</div>
+    <h2 id="heroHeadline">Fresh · Bright · Plant-Filled · Homemade · Daily</h2>
+    <p id="heroSubheadline">Artisan neighbourhood café + bakery with Italian influence in Tribeca, New York City.</p>
+    <div>
+      <a href="#menu" class="btn btn-primary" style="font-size: 15px; padding: 12px 28px;">Order Pickup & Takeaway</a>
+      <button class="btn btn-admin" style="font-size: 15px; padding: 12px 24px; margin-left: 8px;" onclick="openBannerModal()">Edit Hero Texts</button>
+    </div>
+  </section>
+
+  <main class="main-content" id="menu">
+    <!-- Owner CMS Quick Banner -->
+    <div class="owner-cms-banner">
+      <div class="owner-cms-text">
+        <h3>
+          <span>Artesano Cafe — Owner CMS & Live Editor</span>
+          <span class="badge-cms">LIVE NO-CODE SYNC</span>
+        </h3>
+        <p>Edit photos, dish prices, descriptions, and availability. Changes update immediately on this site without rebuilding code.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" onclick="openNewDishModal()">+ Add New Dish</button>
+        <a href="/admin" class="btn btn-admin">Open Full Admin (PIN 1234)</a>
+      </div>
+    </div>
+
+    <h2 class="section-title">Artisan Culinary Selection</h2>
+    <p class="section-subtitle">Freshly baked in-house daily & prepared with organic ingredients in Tribeca</p>
+    
+    <div class="menu-grid" id="menuGrid">
+      <!-- Items dynamically populated from localStorage or default seed -->
+    </div>
+  </main>
+
+  <!-- Floating Dock -->
+  <div class="floating-admin-dock">
+    <span>🛡️ Cafe Owner Mode</span>
+    <button class="btn btn-edit-mode" style="padding: 4px 10px; font-size: 12px;" onclick="toggleEditMode()">
+      Toggle Edit
+    </button>
+    <a href="/admin">Full Admin →</a>
+  </div>
+
+  <!-- Dish Edit Modal -->
+  <div id="dishModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Edit Dish</h3>
+        <button class="modal-close" onclick="closeDishModal()">&times;</button>
+      </div>
+      <form id="dishForm" onsubmit="saveDishForm(event)">
+        <input type="hidden" id="editDishId">
+        
+        <div class="form-group">
+          <label>Dish Name</label>
+          <input type="text" id="editDishName" class="form-control" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Price ($ USD)</label>
+            <input type="number" step="0.05" id="editDishPrice" class="form-control" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Category</label>
+            <select id="editDishCategory" class="form-control">
+              <option value="Morning">Morning Menu</option>
+              <option value="Sandwich">Sandwiches & Savoury</option>
+              <option value="Bakery">Bakery & Pastries</option>
+              <option value="Coffee">Specialty Coffee</option>
+              <option value="Beverages">Cold Beverages</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="editDishDesc" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Badge (e.g. POPULAR, VEGAN)</label>
+            <input type="text" id="editDishBadge" class="form-control">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Availability</label>
+            <select id="editDishStock" class="form-control">
+              <option value="true">In Stock</option>
+              <option value="false">Sold Out</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dish Photograph</label>
+          <input type="file" id="editDishFileInput" accept="image/*" class="form-control" onchange="handleModalPhotoSelect(this)">
+          <input type="text" id="editDishImgUrl" class="form-control" placeholder="Or enter Image URL" style="margin-top: 6px;" oninput="updateModalPreview(this.value)">
+          <div id="modalImgPreview" class="preview-thumb"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" style="color: #c62828; border-color: #c62828;" onclick="deleteCurrentModalDish()">Delete Dish</button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-outline" onclick="closeDishModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Banner Edit Modal -->
+  <div id="bannerModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Website Banners & Status</h3>
+        <button class="modal-close" onclick="closeBannerModal()">&times;</button>
+      </div>
+      <form onsubmit="saveBannerForm(event)">
+        <div class="form-group">
+          <label>Store Status</label>
+          <select id="bannerStatusSelect" class="form-control">
+            <option value="OPEN">Open Now</option>
+            <option value="CLOSED">Closed</option>
+            <option value="TEMPORARILY_CLOSED">Temporarily Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Hero Headline</label>
+          <input type="text" id="bannerHeadlineInput" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Hero Subheadline</label>
+          <textarea id="bannerSubheadlineInput" class="form-control" rows="2" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Morning Menu Schedule</label>
+          <input type="text" id="bannerMorningInput" class="form-control">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeBannerModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish Banners</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Changes saved successfully!</div>
+
+  <footer>
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h3 style="color: var(--gold); font-size: 22px; margin-bottom: 10px;">Artesano Cafe</h3>
+      <p style="margin-bottom: 6px;">90 Chambers St Unit B, New York, NY 10007, United States</p>
+      <p style="margin-bottom: 16px;">Direct Line: <a href="tel:+12123720297">+1 212-372-0297</a></p>
+      <p style="font-size: 13px; margin-bottom: 10px;">
+        <a href="/admin" style="color: var(--gold); font-weight: 700;">Owner Admin Portal</a> · 
+        <a href="#" onclick="toggleEditMode(); return false;">Toggle In-Place Visual Editor</a>
+      </p>
+      <p style="font-size: 12px; color: #aaa;">&copy; 2026 Artesano Cafe. Connected with Android Native App & Vercel Edge.</p>
+    </div>
+  </footer>
+
+  <script>
+    const defaultMenu = [
+      { id: "sw_1", name: "Avocado Toast", price: 9.95, desc: "Sourdough toast topped with smashed avocado, lime, chili flakes, and microgreens.", cat: "Morning", badge: "VEGAN", inStock: true, img: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e2?w=600&auto=format&fit=crop" },
+      { id: "sw_6", name: "Pan con Chicharrón", price: 10.95, desc: "Crispy pork belly, fried sweet potato, and salsa criolla on fresh artisan bread.", cat: "Sandwich", badge: "POPULAR", inStock: true, img: "https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&auto=format&fit=crop" },
+      { id: "sw_3", name: "Classic Omelette", price: 13.95, desc: "Folded golden omelette served with seasoned home fries and herb salad.", cat: "Morning", badge: "CHEF SPECIAL", inStock: true, img: "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600&auto=format&fit=crop" },
+      { id: "p_1", name: "Peruvian Alfajores", price: 4.95, desc: "Handmade cornstarch shortbread cookies sandwiched with rich dulce de leche.", cat: "Bakery", badge: "HOMEMADE", inStock: true, img: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop" },
+      { id: "c_4", name: "Cortado", price: 4.00, desc: "Equal parts rich espresso and silky warm milk in a black ceramic glass.", cat: "Coffee", badge: "SPECIALTY", inStock: true, img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop" },
+      { id: "p_2", name: "Almond Croissant", price: 5.50, desc: "Flaky twice-baked croissant filled with rich almond frangipane cream.", cat: "Bakery", badge: "FRESH DAILY", inStock: true, img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop" },
+      { id: "sw_5", name: "Burrata Caprese", price: 14.95, desc: "Creamy fresh burrata with heirloom tomatoes, basil pesto, and aged balsamic reduction.", cat: "Sandwich", badge: "VEGETARIAN", inStock: true, img: "https://images.unsplash.com/photo-1592417817098-8f3d69109853?w=600&auto=format&fit=crop" }
+    ];
+
+    let editMode = true; // Enabled by default for easy owner access
+
+    function getMenu() {
+      const saved = localStorage.getItem("artesano_menu");
+      return saved ? JSON.parse(saved) : defaultMenu;
+    }
+
+    function saveMenu(menu) {
+      localStorage.setItem("artesano_menu", JSON.stringify(menu));
+    }
+
+    function getSettings() {
+      const saved = localStorage.getItem("artesano_settings");
+      return saved ? JSON.parse(saved) : {
+        status: "OPEN",
+        headline: "Fresh · Bright · Plant-Filled · Homemade · Daily",
+        subheadline: "Artisan neighbourhood café + bakery with Italian influence in Tribeca, New York City.",
+        morningWindow: "Morning Menu Served Daily 8:00 AM – 11:00 AM"
+      };
+    }
+
+    function saveSettings(settings) {
+      localStorage.setItem("artesano_settings", JSON.stringify(settings));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      setTimeout(() => t.style.display = "none", 3000);
+    }
+
+    function toggleEditMode() {
+      editMode = !editMode;
+      const btn = document.getElementById("btnToggleEditMode");
+      const label = document.getElementById("editModeLabel");
+      if (editMode) {
+        btn.classList.add("active");
+        label.textContent = "ON";
+      } else {
+        btn.classList.remove("active");
+        label.textContent = "OFF";
+      }
+      loadState();
+    }
+
+    function loadState() {
+      const menu = getMenu();
+      const settings = getSettings();
+
+      if (settings.headline) document.getElementById("heroHeadline").textContent = settings.headline;
+      if (settings.subheadline) document.getElementById("heroSubheadline").textContent = settings.subheadline;
+      if (settings.morningWindow) document.getElementById("morningWindow").textContent = settings.morningWindow;
+
+      const banner = document.getElementById("statusBanner");
+      if (settings.status === "CLOSED") {
+        banner.className = "status-bar status-closed";
+        banner.textContent = "CLOSED · OPENS 7:30 AM · TRIBECA NYC";
+      } else if (settings.status === "TEMPORARILY_CLOSED") {
+        banner.className = "status-bar status-temp";
+        banner.textContent = "TEMPORARILY CLOSED FOR PRIVATE TASTING";
+      } else {
+        banner.className = "status-bar status-open";
+        banner.textContent = "OPEN NOW · 7:30 AM – 6:00 PM · TRIBECA NYC";
+      }
+
+      const grid = document.getElementById("menuGrid");
+      grid.innerHTML = "";
+      menu.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "menu-card";
+        const isOut = item.inStock === false;
+
+        card.innerHTML = `
+          <div class="card-img" style="background-image: url('${item.img || 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop'}')">
+            ${item.badge ? `<span class="card-badge">${item.badge}</span>` : ''}
+            ${isOut ? `<span class="card-stock-badge">SOLD OUT</span>` : ''}
+            ${editMode ? `<button class="card-edit-overlay-btn" onclick="openEditDishModal('${item.id}')">✏️ Edit Dish</button>` : ''}
+          </div>
+          <div class="card-body">
+            <h3>${item.name}</h3>
+            <p>${item.desc || ''}</p>
+            <div class="card-footer">
+              <span class="price">$${parseFloat(item.price).toFixed(2)}</span>
+              <div class="card-actions">
+                ${editMode ? `<button class="btn-edit-dish" onclick="openEditDishModal('${item.id}')">Edit</button>` : ''}
+                <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;" ${isOut ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                  ${isOut ? 'Unavailable' : 'Add to Order'}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Modal Operations
+    function openEditDishModal(id) {
+      const menu = getMenu();
+      const item = menu.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById("modalTitle").textContent = "Edit Dish: " + item.name;
+      document.getElementById("editDishId").value = item.id;
+      document.getElementById("editDishName").value = item.name;
+      document.getElementById("editDishPrice").value = item.price;
+      document.getElementById("editDishCategory").value = item.cat || "Morning";
+      document.getElementById("editDishDesc").value = item.desc || "";
+      document.getElementById("editDishBadge").value = item.badge || "";
+      document.getElementById("editDishStock").value = item.inStock !== false ? "true" : "false";
+      document.getElementById("editDishImgUrl").value = item.img || "";
+      updateModalPreview(item.img);
+
+      document.getElementById("dishModal").style.display = "flex";
+    }
+
+    function openNewDishModal() {
+      document.getElementById("modalTitle").textContent = "Add New Dish";
+      document.getElementById("editDishId").value = "";
+      document.getElementById("editDishName").value = "";
+      document.getElementById("editDishPrice").value = "9.50";
+      document.getElementById("editDishCategory").value = "Morning";
+      document.getElementById("editDishDesc").value = "";
+      document.getElementById("editDishBadge").value = "NEW";
+      document.getElementById("editDishStock").value = "true";
+      const defaultImg = "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop";
+      document.getElementById("editDishImgUrl").value = defaultImg;
+      updateModalPreview(defaultImg);
+
+      document.getElementById("dishModal").style.display = "flex";
+    }
+
+    function closeDishModal() {
+      document.getElementById("dishModal").style.display = "none";
+    }
+
+    function updateModalPreview(url) {
+      const preview = document.getElementById("modalImgPreview");
+      preview.style.backgroundImage = `url('${url || ''}')`;
+    }
+
+    function handleModalPhotoSelect(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("editDishImgUrl").value = e.target.result;
+          updateModalPreview(e.target.result);
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function saveDishForm(e) {
+      e.preventDefault();
+      const id = document.getElementById("editDishId").value;
+      const name = document.getElementById("editDishName").value;
+      const price = parseFloat(document.getElementById("editDishPrice").value);
+      const cat = document.getElementById("editDishCategory").value;
+      const desc = document.getElementById("editDishDesc").value;
+      const badge = document.getElementById("editDishBadge").value;
+      const inStock = document.getElementById("editDishStock").value === "true";
+      const img = document.getElementById("editDishImgUrl").value;
+
+      let menu = getMenu();
+      if (id) {
+        const item = menu.find(d => d.id === id);
+        if (item) {
+          item.name = name;
+          item.price = price;
+          item.cat = cat;
+          item.desc = desc;
+          item.badge = badge;
+          item.inStock = inStock;
+          if (img) item.img = img;
+        }
+        showToast(`Saved updates for "${name}"!`);
+      } else {
+        const newDish = {
+          id: "custom_" + Date.now(),
+          name, price, cat, desc, badge, inStock,
+          img: img || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop"
+        };
+        menu.unshift(newDish);
+        showToast(`Created new dish "${name}"!`);
+      }
+
+      saveMenu(menu);
+      closeDishModal();
+      loadState();
+    }
+
+    function deleteCurrentModalDish() {
+      const id = document.getElementById("editDishId").value;
+      if (!id) {
+        closeDishModal();
+        return;
+      }
+      let menu = getMenu();
+      const item = menu.find(d => d.id === id);
+      if (confirm(`Are you sure you want to delete "${item?.name}"?`)) {
+        menu = menu.filter(d => d.id !== id);
+        saveMenu(menu);
+        closeDishModal();
+        loadState();
+        showToast("Dish removed from menu.");
+      }
+    }
+
+    // Banner Modal
+    function openBannerModal() {
+      const settings = getSettings();
+      document.getElementById("bannerStatusSelect").value = settings.status || "OPEN";
+      document.getElementById("bannerHeadlineInput").value = settings.headline || "";
+      document.getElementById("bannerSubheadlineInput").value = settings.subheadline || "";
+      document.getElementById("bannerMorningInput").value = settings.morningWindow || "";
+      document.getElementById("bannerModal").style.display = "flex";
+    }
+
+    function closeBannerModal() {
+      document.getElementById("bannerModal").style.display = "none";
+    }
+
+    function saveBannerForm(e) {
+      e.preventDefault();
+      const settings = getSettings();
+      settings.status = document.getElementById("bannerStatusSelect").value;
+      settings.headline = document.getElementById("bannerHeadlineInput").value;
+      settings.subheadline = document.getElementById("bannerSubheadlineInput").value;
+      settings.morningWindow = document.getElementById("bannerMorningInput").value;
+
+      saveSettings(settings);
+      closeBannerModal();
+      loadState();
+      showToast("Website banners & status published successfully!");
+    }
+
+    // Initialize
+    loadState();
+  </script>
+</body>
+</html>

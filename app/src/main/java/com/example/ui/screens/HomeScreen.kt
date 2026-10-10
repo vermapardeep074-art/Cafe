@@ -48,6 +48,8 @@ fun HomeScreen(
   onQuickAdd: (MenuItem) -> Unit,
   onToggleFavorite: (String) -> Unit,
   onViewMorningMenu: () -> Unit,
+  onOpenAdmin: () -> Unit = {},
+  onEditItem: (MenuItem) -> Unit = {},
   modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
@@ -68,12 +70,23 @@ fun HomeScreen(
           .fillMaxWidth()
           .height(300.dp)
       ) {
-        Image(
-          painter = painterResource(id = R.drawable.img_hero_artesano),
-          contentDescription = "Artesano Cafe Tribeca",
-          modifier = Modifier.fillMaxSize(),
-          contentScale = ContentScale.Crop
-        )
+        if (!storeSettings.customBannerUri.isNullOrEmpty()) {
+          coil.compose.AsyncImage(
+            model = storeSettings.customBannerUri,
+            contentDescription = "Artesano Cafe Tribeca",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(id = R.drawable.img_hero_artesano),
+            error = painterResource(id = R.drawable.img_hero_artesano)
+          )
+        } else {
+          Image(
+            painter = painterResource(id = R.drawable.img_hero_artesano),
+            contentDescription = "Artesano Cafe Tribeca",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+          )
+        }
 
         // Luxury Gradient Overlay
         Box(
@@ -121,7 +134,7 @@ fun HomeScreen(
           )
 
           Text(
-            text = "Fresh · Bright · Plant-Filled · Homemade · Daily",
+            text = storeSettings.bannerHeadline,
             style = MaterialTheme.typography.bodyLarge,
             color = SoftGoldLight,
             fontWeight = FontWeight.Medium,
@@ -262,6 +275,103 @@ fun HomeScreen(
       }
     }
 
+    // 2B. OWNER CMS & LIVE VISUAL EDITOR ENTRY POINT
+    item {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp, vertical = 4.dp)
+          .clickable { onOpenAdmin() }
+          .testTag("admin_cms_banner_card"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(14.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+          Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Surface(
+              shape = CircleShape,
+              color = WarmCaramel.copy(alpha = 0.15f),
+              modifier = Modifier.size(44.dp)
+            ) {
+              Box(contentAlignment = Alignment.Center) {
+                Icon(
+                  imageVector = Icons.Default.AdminPanelSettings,
+                  contentDescription = "Admin CMS",
+                  tint = WarmCaramel,
+                  modifier = Modifier.size(24.dp)
+                )
+              }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                  text = "Owner Admin CMS",
+                  style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                  shape = RoundedCornerShape(4.dp),
+                  color = LeafGreenDark.copy(alpha = 0.15f)
+                ) {
+                  Text(
+                    text = "NO-CODE LIVE",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = LeafGreenDark,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                  )
+                }
+              }
+              Text(
+                text = "Edit dish photos, prices, stocks, & banners",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+              )
+            }
+          }
+
+          Button(
+            onClick = onOpenAdmin,
+            colors = ButtonDefaults.buttonColors(
+              containerColor = WarmCaramel,
+              contentColor = PureWhite
+            ),
+            shape = RoundedCornerShape(10.dp),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.testTag("open_admin_button")
+          ) {
+            Icon(
+              imageVector = Icons.Default.Edit,
+              contentDescription = null,
+              modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Edit",
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.Bold
+            )
+          }
+        }
+      }
+    }
+
     // 3. MORNING MENU HIGHLIGHT BANNER
     item {
       Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
@@ -380,7 +490,8 @@ fun HomeScreen(
                 isFavorite = favorites.contains(item.id),
                 onItemClick = { onItemClick(item) },
                 onQuickAdd = { onQuickAdd(item) },
-                onToggleFavorite = { onToggleFavorite(item.id) }
+                onToggleFavorite = { onToggleFavorite(item.id) },
+                onEditItem = { onEditItem(item) }
               )
             }
           }

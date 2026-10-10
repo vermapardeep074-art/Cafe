@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -39,6 +40,7 @@ fun LuxuryMenuItemCard(
   onItemClick: () -> Unit,
   onQuickAdd: () -> Unit,
   onToggleFavorite: () -> Unit,
+  onEditItem: ((MenuItem) -> Unit)? = null,
   modifier: Modifier = Modifier
 ) {
   Card(
@@ -61,12 +63,23 @@ fun LuxuryMenuItemCard(
           .height(140.dp)
           .background(MaterialTheme.colorScheme.surfaceVariant)
       ) {
-        Image(
-          painter = painterResource(id = item.imageRes),
-          contentDescription = item.name,
-          modifier = Modifier.fillMaxSize(),
-          contentScale = ContentScale.Crop
-        )
+        if (!item.imageUri.isNullOrEmpty()) {
+          coil.compose.AsyncImage(
+            model = item.imageUri,
+            contentDescription = item.name,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(id = item.imageRes),
+            error = painterResource(id = item.imageRes)
+          )
+        } else {
+          Image(
+            painter = painterResource(id = item.imageRes),
+            contentDescription = item.name,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+          )
+        }
 
         // Gradient overlay
         Box(
@@ -131,20 +144,39 @@ fun LuxuryMenuItemCard(
             }
           }
 
-          // Favorite button
-          IconButton(
-            onClick = onToggleFavorite,
-            modifier = Modifier
-              .size(32.dp)
-              .background(PureWhite.copy(alpha = 0.85f), CircleShape)
-              .testTag("fav_btn_${item.id}")
-          ) {
-            Icon(
-              imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
-              contentDescription = "Favorite",
-              tint = if (isFavorite) StatusClosed else EspressoBrown,
-              modifier = Modifier.size(18.dp)
-            )
+          // Action buttons: Edit & Favorite
+          Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (onEditItem != null) {
+              IconButton(
+                onClick = { onEditItem(item) },
+                modifier = Modifier
+                  .size(32.dp)
+                  .background(PureWhite.copy(alpha = 0.92f), CircleShape)
+                  .testTag("edit_btn_${item.id}")
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Edit,
+                  contentDescription = "Edit Dish",
+                  tint = WarmCaramel,
+                  modifier = Modifier.size(16.dp)
+                )
+              }
+            }
+
+            IconButton(
+              onClick = onToggleFavorite,
+              modifier = Modifier
+                .size(32.dp)
+                .background(PureWhite.copy(alpha = 0.85f), CircleShape)
+                .testTag("fav_btn_${item.id}")
+            ) {
+              Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = if (isFavorite) StatusClosed else EspressoBrown,
+                modifier = Modifier.size(18.dp)
+              )
+            }
           }
         }
 
@@ -227,30 +259,60 @@ fun LuxuryMenuItemCard(
             }
           }
 
-          FilledTonalButton(
-            onClick = onQuickAdd,
-            enabled = item.inStock,
-            colors = ButtonDefaults.filledTonalButtonColors(
-              containerColor = MaterialTheme.colorScheme.primary,
-              contentColor = PureWhite
-            ),
-            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier
-              .height(36.dp)
-              .testTag("add_button_${item.id}")
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            Icon(
-              imageVector = Icons.Default.Add,
-              contentDescription = null,
-              modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              text = "Add",
-              style = MaterialTheme.typography.labelMedium,
-              fontWeight = FontWeight.Bold
-            )
+            if (onEditItem != null) {
+              OutlinedButton(
+                onClick = { onEditItem(item) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                  .height(36.dp)
+                  .testTag("edit_dish_bottom_${item.id}")
+              ) {
+                Icon(
+                  imageVector = Icons.Default.Edit,
+                  contentDescription = null,
+                  tint = WarmCaramel,
+                  modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(
+                  text = "Edit",
+                  style = MaterialTheme.typography.labelMedium,
+                  color = WarmCaramel,
+                  fontWeight = FontWeight.Bold
+                )
+              }
+            }
+
+            FilledTonalButton(
+              onClick = onQuickAdd,
+              enabled = item.inStock,
+              colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = PureWhite
+              ),
+              contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+              shape = RoundedCornerShape(12.dp),
+              modifier = Modifier
+                .height(36.dp)
+                .testTag("add_button_${item.id}")
+            ) {
+              Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = "Add",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+              )
+            }
           }
         }
       }

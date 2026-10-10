@@ -1,12 +1,18 @@
 package com.example.data
 
+import android.content.Context
+import android.net.Uri
 import com.example.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
 import java.util.UUID
 
-class ArtesanoRepository {
+class ArtesanoRepository(private var appContext: Context? = null) {
 
   private val _menuItems = MutableStateFlow<List<MenuItem>>(createInitialMenuItems())
   val menuItems: StateFlow<List<MenuItem>> = _menuItems.asStateFlow()
@@ -42,6 +48,84 @@ class ArtesanoRepository {
     )
   )
   val auditLogs: StateFlow<List<String>> = _auditLogs.asStateFlow()
+
+  init {
+    loadPersistentDataIfAvailable()
+  }
+
+  fun setContext(context: Context) {
+    if (this.appContext == null) {
+      this.appContext = context.applicationContext
+      loadPersistentDataIfAvailable()
+    }
+  }
+
+  private val menuFile: File?
+    get() = appContext?.let { File(it.filesDir, "artesano_menu.json") }
+
+  private val settingsFile: File?
+    get() = appContext?.let { File(it.filesDir, "artesano_settings.json") }
+
+  private val photosDir: File?
+    get() = appContext?.let {
+      File(it.filesDir, "uploaded_photos").apply { if (!exists()) mkdirs() }
+    }
+
+  private fun loadPersistentDataIfAvailable() {
+    val mFile = menuFile
+    if (mFile != null && mFile.exists()) {
+      runCatching {
+        val jsonStr = mFile.readText()
+        val jsonArray = JSONArray(jsonStr)
+        val loadedList = mutableListOf<MenuItem>()
+        for (i in 0 until jsonArray.length()) {
+          val obj = jsonArray.getJSONObject(i)
+          loadedList.add(menuItemFromJson(obj))
+        }
+        if (loadedList.isNotEmpty()) {
+          _menuItems.value = loadedList
+          addAudit("Loaded ${loadedList.size} menu items from persistent storage")
+        }
+      }.onFailure {
+        it.printStackTrace()
+      }
+    }
+
+    val sFile = settingsFile
+    if (sFile != null && sFile.exists()) {
+      runCatching {
+        val jsonStr = sFile.readText()
+        val obj = JSONObject(jsonStr)
+        _settings.value = storeSettingsFromJson(obj)
+        addAudit("Loaded store branding & settings from persistent storage")
+      }.onFailure {
+        it.printStackTrace()
+      }
+    }
+  }
+
+  private fun saveMenuToFile() {
+    val mFile = menuFile ?: return
+    runCatching {
+      val jsonArray = JSONArray()
+      _menuItems.value.forEach { item ->
+        jsonArray.put(menuItemToJson(item))
+      }
+      mFile.writeText(jsonArray.toString(2))
+    }.onFailure {
+      it.printStackTrace()
+    }
+  }
+
+  private fun saveSettingsToFile() {
+    val sFile = settingsFile ?: return
+    runCatching {
+      val json = storeSettingsToJson(_settings.value)
+      sFile.writeText(json.toString(2))
+    }.onFailure {
+      it.printStackTrace()
+    }
+  }
 
   // --- Cart operations ---
   fun addToCart(
@@ -211,6 +295,7 @@ class ArtesanoRepository {
     _menuItems.value = _menuItems.value.map {
       if (it.id == itemId) it.copy(priceUsd = newPriceUsd, priceInr = newPriceUsd * 83.0) else it
     }
+    saveMenuToFile()
     addAudit("Item $itemId price updated to $${String.format("%.2f", newPriceUsd)}")
   }
 
@@ -222,40 +307,114 @@ class ArtesanoRepository {
         it.copy(inStock = nextStock)
       } else it
     }
+    saveMenuToFile()
   }
 
   fun updateMenuItem(updated: MenuItem) {
     _menuItems.value = _menuItems.value.map {
       if (it.id == updated.id) updated else it
     }
+    saveMenuToFile()
     addAudit("Menu item '${updated.name}' updated")
   }
 
   fun addNewMenuItem(item: MenuItem) {
     _menuItems.value = listOf(item) + _menuItems.value
+    saveMenuToFile()
     addAudit("Created new menu item '${item.name}'")
   }
 
   fun deleteMenuItem(itemId: String) {
     val found = _menuItems.value.find { it.id == itemId }
     _menuItems.value = _menuItems.value.filter { it.id != itemId }
+    saveMenuToFile()
     addAudit("Deleted menu item '${found?.name ?: itemId}'")
+  }
+
+  fun reorderMenuItem(itemId: String, moveUp: Boolean) {
+    val current = _menuItems.value.toMutableList()
+    val index = current.indexOfFirst { it.id == itemId }
+    if (index < 0) return
+    val targetIndex = if (moveUp) index - 1 else index + 1
+    if (targetIndex in 0 until current.size) {
+      val item = current.removeAt(index)
+      current.add(targetIndex, item)
+      _menuItems.value = current
+      saveMenuToFile()
+      addAudit("Reordered item '${item.name}'")
+    }
+  }
+
+  fun saveUploadedPhoto(itemId: String, sourceUri: Uri): String? {
+    val ctx = appContext ?: return null
+    return runCatching {
+      val targetFile = File(photosDir, "dish_${itemId}_${System.currentTimeMillis()}.jpg")
+      ctx.contentResolver.openInputStream(sourceUri)?.use { input ->
+        FileOutputStream(targetFile).use { output ->
+          input.copyTo(output)
+        }
+      }
+      val fileUriString = targetFile.absolutePath
+      _menuItems.value = _menuItems.value.map {
+        if (it.id == itemId) it.copy(imageUri = fileUriString) else it
+      }
+      saveMenuToFile()
+      addAudit("Saved persistent photograph for dish ID $itemId")
+      fileUriString
+    }.getOrNull()
+  }
+
+  fun saveUploadedLogo(sourceUri: Uri): String? {
+    val ctx = appContext ?: return null
+    return runCatching {
+      val targetFile = File(photosDir, "logo_${System.currentTimeMillis()}.jpg")
+      ctx.contentResolver.openInputStream(sourceUri)?.use { input ->
+        FileOutputStream(targetFile).use { output ->
+          input.copyTo(output)
+        }
+      }
+      val path = targetFile.absolutePath
+      _settings.value = _settings.value.copy(customLogoUri = path)
+      saveSettingsToFile()
+      addAudit("Custom café logo uploaded & published")
+      path
+    }.getOrNull()
+  }
+
+  fun saveUploadedBanner(sourceUri: Uri): String? {
+    val ctx = appContext ?: return null
+    return runCatching {
+      val targetFile = File(photosDir, "banner_${System.currentTimeMillis()}.jpg")
+      ctx.contentResolver.openInputStream(sourceUri)?.use { input ->
+        FileOutputStream(targetFile).use { output ->
+          input.copyTo(output)
+        }
+      }
+      val path = targetFile.absolutePath
+      _settings.value = _settings.value.copy(customBannerUri = path)
+      saveSettingsToFile()
+      addAudit("Custom hero banner photograph uploaded & published")
+      path
+    }.getOrNull()
   }
 
   // --- Store Settings & Status ---
   fun updateStoreStatus(status: StoreStatus) {
     _settings.value = _settings.value.copy(status = status)
+    saveSettingsToFile()
     addAudit("Store status changed to: ${status.title}")
   }
 
   fun toggleCurrency() {
     val next = if (_settings.value.activeCurrency == Currency.USD) Currency.INR else Currency.USD
     _settings.value = _settings.value.copy(activeCurrency = next)
+    saveSettingsToFile()
     addAudit("Active currency toggled to: ${next.code}")
   }
 
   fun toggleTheme() {
     _settings.value = _settings.value.copy(darkTheme = !_settings.value.darkTheme)
+    saveSettingsToFile()
   }
 
   fun updateStoreContact(phone: String, address: String, hours: String, morningHours: String) {
@@ -265,7 +424,117 @@ class ArtesanoRepository {
       storeHours = hours,
       morningHours = morningHours
     )
+    saveSettingsToFile()
     addAudit("Store contact and hours updated")
+  }
+
+  fun updateBannerAndThemeSettings(
+    headline: String,
+    subheadline: String,
+    announcement: String,
+    announcementActive: Boolean,
+    darkTheme: Boolean
+  ) {
+    _settings.value = _settings.value.copy(
+      bannerHeadline = headline,
+      bannerSubheadline = subheadline,
+      announcementText = announcement,
+      announcementActive = announcementActive,
+      darkTheme = darkTheme
+    )
+    saveSettingsToFile()
+    addAudit("Website banners, announcements, and theme updated")
+  }
+
+  fun resetMenuToDefaults() {
+    menuFile?.delete()
+    settingsFile?.delete()
+    _menuItems.value = createInitialMenuItems()
+    _settings.value = StoreSettings()
+    addAudit("Reset menu & settings to factory defaults")
+  }
+
+  private fun menuItemToJson(item: MenuItem): JSONObject {
+    return JSONObject().apply {
+      put("id", item.id)
+      put("name", item.name)
+      put("description", item.description)
+      put("priceUsd", item.priceUsd)
+      put("priceInr", item.priceInr ?: (item.priceUsd * 83.0))
+      put("category", item.category.name)
+      put("isMorningMenu", item.isMorningMenu)
+      put("inStock", item.inStock)
+      put("imageRes", item.imageRes)
+      if (item.imageUri != null) put("imageUri", item.imageUri)
+      put("isPopular", item.isPopular)
+      put("isChefSpecial", item.isChefSpecial)
+      val tags = JSONArray()
+      item.dietaryTags.forEach { tags.put(it.name) }
+      put("dietaryTags", tags)
+    }
+  }
+
+  private fun menuItemFromJson(obj: JSONObject): MenuItem {
+    val tags = mutableListOf<DietaryTag>()
+    val tagsArray = obj.optJSONArray("dietaryTags")
+    if (tagsArray != null) {
+      for (i in 0 until tagsArray.length()) {
+        runCatching { DietaryTag.valueOf(tagsArray.getString(i)) }.getOrNull()?.let { tags.add(it) }
+      }
+    }
+    return MenuItem(
+      id = obj.getString("id"),
+      name = obj.getString("name"),
+      description = obj.optString("description", ""),
+      priceUsd = obj.optDouble("priceUsd", 5.0),
+      priceInr = if (obj.has("priceInr")) obj.getDouble("priceInr") else null,
+      category = runCatching { MenuCategory.valueOf(obj.getString("category")) }.getOrDefault(MenuCategory.PASTRIES),
+      isMorningMenu = obj.optBoolean("isMorningMenu", false),
+      inStock = obj.optBoolean("inStock", true),
+      imageRes = obj.optInt("imageRes", R.drawable.ic_artesano_logo),
+      imageUri = if (obj.has("imageUri")) obj.getString("imageUri") else null,
+      dietaryTags = tags,
+      isPopular = obj.optBoolean("isPopular", false),
+      isChefSpecial = obj.optBoolean("isChefSpecial", false)
+    )
+  }
+
+  private fun storeSettingsToJson(s: StoreSettings): JSONObject {
+    return JSONObject().apply {
+      put("status", s.status.name)
+      put("phone", s.phone)
+      put("address", s.address)
+      put("morningHours", s.morningHours)
+      put("storeHours", s.storeHours)
+      put("activeCurrency", s.activeCurrency.name)
+      put("darkTheme", s.darkTheme)
+      put("bannerHeadline", s.bannerHeadline)
+      put("bannerSubheadline", s.bannerSubheadline)
+      put("announcementText", s.announcementText)
+      put("announcementActive", s.announcementActive)
+      if (s.customLogoUri != null) put("customLogoUri", s.customLogoUri)
+      if (s.customBannerUri != null) put("customBannerUri", s.customBannerUri)
+      put("adminPin", s.adminPin)
+    }
+  }
+
+  private fun storeSettingsFromJson(obj: JSONObject): StoreSettings {
+    return StoreSettings(
+      status = runCatching { StoreStatus.valueOf(obj.getString("status")) }.getOrDefault(StoreStatus.OPEN),
+      phone = obj.optString("phone", "+1 212-372-0297"),
+      address = obj.optString("address", "90 Chambers St Unit B, New York, NY 10007, United States"),
+      morningHours = obj.optString("morningHours", "8:00 AM – 11:00 AM"),
+      storeHours = obj.optString("storeHours", "Mon – Sun: 7:30 AM – 6:00 PM"),
+      activeCurrency = runCatching { Currency.valueOf(obj.getString("activeCurrency")) }.getOrDefault(Currency.USD),
+      darkTheme = obj.optBoolean("darkTheme", false),
+      bannerHeadline = obj.optString("bannerHeadline", "Fresh · Bright · Plant-Filled · Homemade · Daily"),
+      bannerSubheadline = obj.optString("bannerSubheadline", "Morning Menu served daily 8:00 AM – 11:00 AM · Artisan Bakery & Specialty Coffee in Tribeca"),
+      announcementText = obj.optString("announcementText", ""),
+      announcementActive = obj.optBoolean("announcementActive", false),
+      customLogoUri = if (obj.has("customLogoUri")) obj.getString("customLogoUri") else null,
+      customBannerUri = if (obj.has("customBannerUri")) obj.getString("customBannerUri") else null,
+      adminPin = obj.optString("adminPin", "1234")
+    )
   }
 
   // --- Favorites ---

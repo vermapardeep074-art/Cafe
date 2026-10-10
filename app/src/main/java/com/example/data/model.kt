@@ -65,6 +65,7 @@ data class MenuItem(
   val isMorningMenu: Boolean = false,
   val inStock: Boolean = true,
   val imageRes: Int = R.drawable.ic_artesano_logo,
+  val imageUri: String? = null,
   val dietaryTags: List<DietaryTag> = emptyList(),
   val isPopular: Boolean = false,
   val isChefSpecial: Boolean = false
@@ -128,5 +129,12 @@ data class StoreSettings(
   val morningHours: String = "8:00 AM – 11:00 AM",
   val storeHours: String = "Mon – Sun: 7:30 AM – 6:00 PM",
   val activeCurrency: Currency = Currency.USD,
-  val darkTheme: Boolean = false
+  val darkTheme: Boolean = false,
+  val bannerHeadline: String = "Fresh · Bright · Plant-Filled · Homemade · Daily",
+  val bannerSubheadline: String = "Morning Menu served daily 8:00 AM – 11:00 AM · Artisan Bakery & Specialty Coffee in Tribeca",
+  val announcementText: String = "",
+  val announcementActive: Boolean = false,
+  val customLogoUri: String? = null,
+  val customBannerUri: String? = null,
+  val adminPin: String = "1234"
 )

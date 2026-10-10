@@ -14,9 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.Currency
@@ -31,6 +33,9 @@ fun ArtesanoTopBar(
   storeStatus: StoreStatus,
   activeCurrency: Currency,
   darkTheme: Boolean,
+  customLogoUri: String? = null,
+  announcementText: String? = null,
+  announcementActive: Boolean = false,
   onNavigate: (AppDestination) -> Unit,
   onToggleCurrency: () -> Unit,
   onToggleTheme: () -> Unit,
@@ -48,6 +53,34 @@ fun ArtesanoTopBar(
         .fillMaxWidth()
         .statusBarsPadding()
     ) {
+      // Top announcement banner if active
+      if (announcementActive && !announcementText.isNullOrBlank()) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .background(WarmCaramel)
+            .padding(horizontal = 16.dp, vertical = 5.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.Center
+        ) {
+          Icon(
+            imageVector = Icons.Default.Campaign,
+            contentDescription = null,
+            tint = PureWhite,
+            modifier = Modifier.size(14.dp)
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = announcementText,
+            color = PureWhite,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+          )
+        }
+      }
+
       // Top status indicator strip if not open
       if (storeStatus != StoreStatus.OPEN) {
         val bannerBg = if (storeStatus == StoreStatus.TEMPORARILY_CLOSED) StatusTempClosed else StatusClosed
@@ -84,39 +117,54 @@ fun ArtesanoTopBar(
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
         // Brand Title & Tagline
-        Column(
+        Row(
           modifier = Modifier
             .clickable { onNavigate(AppDestination.HOME) }
-            .testTag("brand_header")
+            .testTag("brand_header"),
+          verticalAlignment = Alignment.CenterVertically
         ) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-              text = "ARTESANO",
-              style = MaterialTheme.typography.titleLarge,
-              color = MaterialTheme.colorScheme.primary,
-              fontWeight = FontWeight.Bold,
-              letterSpacing = 2.sp
+          if (!customLogoUri.isNullOrEmpty()) {
+            coil.compose.AsyncImage(
+              model = customLogoUri,
+              contentDescription = "Logo",
+              modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape),
+              contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(6.dp))
-            Surface(
-              color = SoftGold.copy(alpha = 0.25f),
-              shape = RoundedCornerShape(4.dp)
-            ) {
-              Text(
-                text = "CAFE",
-                color = WarmCaramel,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-              )
-            }
+            Spacer(modifier = Modifier.width(8.dp))
           }
-          Text(
-            text = "Ristorante Italiano · Tribeca NYC",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            letterSpacing = 0.5.sp
-          )
+
+          Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                text = "ARTESANO",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+              )
+              Spacer(modifier = Modifier.width(6.dp))
+              Surface(
+                color = SoftGold.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(4.dp)
+              ) {
+                Text(
+                  text = "CAFE",
+                  color = WarmCaramel,
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.ExtraBold,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+              }
+            }
+            Text(
+              text = "Ristorante Italiano · Tribeca NYC",
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              letterSpacing = 0.5.sp
+            )
+          }
         }
 
         // Action controls
@@ -186,19 +234,31 @@ fun ArtesanoTopBar(
             }
           }
 
-          // Owner/Admin Dashboard Icon
-          IconButton(
+          // Owner/Admin Dashboard Entry
+          Surface(
             onClick = onOpenAdmin,
-            modifier = Modifier
-              .size(36.dp)
-              .testTag("admin_icon_button")
+            shape = RoundedCornerShape(16.dp),
+            color = WarmCaramel.copy(alpha = 0.12f),
+            modifier = Modifier.testTag("admin_icon_button")
           ) {
-            Icon(
-              imageVector = Icons.Outlined.AdminPanelSettings,
-              contentDescription = "Admin Control Panel",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(20.dp)
-            )
+            Row(
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Icon(
+                imageVector = Icons.Default.AdminPanelSettings,
+                contentDescription = "Admin Control Panel",
+                tint = WarmCaramel,
+                modifier = Modifier.size(18.dp)
+              )
+              Spacer(modifier = Modifier.width(4.dp))
+              Text(
+                text = "Admin",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = WarmCaramel
+              )
+            }
           }
         }
       }

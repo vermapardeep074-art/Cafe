@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artesano Cafe — Owner Admin Panel & CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --espresso: #2A1E17;
+      --charcoal: #121212;
+      --caramel: #B9793A;
+      --gold: #D9B36C;
+      --cream: #F6F1E7;
+      --white: #FFFFFF;
+      --green: #2E7D32;
+      --red: #C62828;
+      --border: rgba(42, 30, 23, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #F8F9FA;
+      color: var(--charcoal);
+      padding-bottom: 80px;
+    }
+    .admin-nav {
+      background: var(--espresso);
+      color: var(--white);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      border-bottom: 1px solid rgba(217, 179, 108, 0.3);
+    }
+    .admin-nav h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-mode {
+      background: rgba(217, 179, 108, 0.25);
+      color: var(--gold);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      background: white;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      color: #555;
+    }
+    .tab-btn.active {
+      background: var(--caramel);
+      color: white;
+      border-color: var(--caramel);
+    }
+    .card {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--caramel); color: var(--white); }
+    .btn-primary:hover { background: #9c6027; }
+    .btn-danger { background: var(--red); color: var(--white); }
+    .btn-danger:hover { background: #a81d1d; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--charcoal); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    .btn-group { display: flex; gap: 8px; }
+    
+    .status-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      background: white;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .status-btn.active-open { background: var(--green); color: white; border-color: var(--green); }
+    .status-btn.active-closed { background: var(--red); color: white; border-color: var(--red); }
+    .status-btn.active-temp { background: #E65100; color: white; border-color: #E65100; }
+    
+    .dish-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+    }
+    .dish-img-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      background-color: #eee;
+      flex-shrink: 0;
+      border: 1px solid #ddd;
+    }
+    .dish-info { flex: 1; min-width: 200px; }
+    .dish-info h4 { font-size: 15px; margin-bottom: 2px; color: var(--espresso); display: flex; align-items: center; gap: 6px; }
+    .dish-info p { font-size: 12px; color: #666; }
+    .dish-meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .dish-price { font-weight: 700; color: var(--caramel); font-size: 15px; }
+    .dish-cat-badge { font-size: 10px; font-weight: 700; background: #eee; padding: 2px 6px; border-radius: 4px; }
+    .dish-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #555; }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-row { display: flex; gap: 12px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--espresso);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+      z-index: 1000;
+      border: 1px solid var(--gold);
+    }
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 18, 18, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 18, 18, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+      padding: 20px;
+    }
+    .modal-box {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .audit-entry {
+      padding: 10px 12px;
+      border-left: 3px solid var(--caramel);
+      background: #faf8f5;
+      margin-bottom: 8px;
+      border-radius: 0 6px 6px 0;
+      font-size: 13px;
+    }
+    .audit-time { font-size: 11px; color: #888; margin-top: 2px; }
+    .order-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- Protected Login -->
+  <div id="loginOverlay">
+    <div class="card" style="width: 380px; text-align: center; margin-bottom: 0;">
+      <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--espresso); color: var(--gold); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">A</div>
+      <h2 style="font-size: 20px; margin-bottom: 4px; color: var(--espresso);">Artesano Cafe</h2>
+      <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Manager & Owner Verification</p>
+      <div class="form-group" style="text-align: left;">
+        <label>PIN (Default: 1234)</label>
+        <input type="password" id="pinInput" class="form-control" placeholder="Enter PIN" value="1234">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="checkLogin()">Unlock Live Admin CMS</button>
+      <button class="btn btn-outline" style="width: 100%; margin-top: 8px; font-size: 12px; justify-content: center;" onclick="document.getElementById('pinInput').value='1234'; checkLogin();">Quick Demo Unlock (1234)</button>
+    </div>
+  </div>
+
+  <nav class="admin-nav">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <h1>🛡️ Artesano Cafe — Live Admin CMS</h1>
+      <span class="badge-mode">NO-CODE LIVE EDITOR</span>
+    </div>
+    <div class="nav-buttons">
+      <a href="/" target="_blank" class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.3);">View Live Website</a>
+      <button class="btn btn-danger btn-sm" onclick="lockAdmin()">Lock</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">🍽️ Menu & Photos</button>
+      <button class="tab-btn" onclick="switchTab(1)">📢 Banners & Branding</button>
+      <button class="tab-btn" onclick="switchTab(2)">🕒 Status & Hours</button>
+      <button class="tab-btn" onclick="switchTab(3)">📦 Orders & Kitchen</button>
+      <button class="tab-btn" onclick="switchTab(4)">📋 Audit Log</button>
+      <button class="tab-btn" onclick="switchTab(5)">💾 Backup & Sync</button>
+    </div>
+
+    <!-- TAB 0: MENU & PHOTOS -->
+    <div id="tab0" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <div>
+            <span>Menu Catalog & Photo Management</span>
+            <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 2px;">Changes take effect immediately on public site without rebuilding</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddDishModal()">+ Add New Dish</button>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <input type="text" id="adminSearchInput" class="form-control" placeholder="Search dishes by name or category..." oninput="filterDishList()">
+        </div>
+
+        <div id="dishList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: BANNERS & BRANDING -->
+    <div id="tab1" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-title">Website Banners & Visual Content</div>
+        <form onsubmit="saveBanners(event)">
+          <div class="form-group">
+            <label>Main Headline</label>
+            <input type="text" id="headlineInput" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Subheadline / Description</label>
+            <textarea id="subheadlineInput" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Morning Menu Schedule Window</label>
+            <input type="text" id="morningInput" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Top Announcement Bar Text</label>
+            <input type="text" id="announcementInput" class="form-control" placeholder="e.g. Free delivery on orders over $35">
+          </div>
+          <div class="form-group">
+            <label>Website Logo Photo</label>
+            <input type="file" accept="image/*" class="form-control" onchange="uploadLogoFile(this)">
+          </div>
+          <div class="form-group">
+            <label>Hero Banner Photograph</label>
+            <input type="file" accept="image/*" class="form-control" onchange="uploadHeroFile(this)">
+          </div>
+          <button type="submit" class="btn btn-primary">Publish Banners & Styling</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 2: STATUS & HOURS -->
+    <div id="tab2" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-title">Live Store Status</div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Controls whether online orders are currently accepted on the website and app.</p>
+        <div class="btn-group">
+          <button id="btnOpen" class="status-btn active-open" onclick="setStatus('OPEN')">🟢 Open Now</button>
+          <button id="btnClosed" class="status-btn" onclick="setStatus('CLOSED')">🔴 Closed</button>
+          <button id="btnTemp" class="status-btn" onclick="setStatus('TEMPORARILY_CLOSED')">🟠 Temporarily Closed</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Business Location & Hours</div>
+        <form onsubmit="saveStoreDetails(event)">
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" id="storeAddressInput" class="form-control" value="90 Chambers St Unit B, New York, NY 10007">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="storePhoneInput" class="form-control" value="+1 212-372-0297">
+          </div>
+          <div class="form-group">
+            <label>Store Hours</label>
+            <input type="text" id="storeHoursInput" class="form-control" value="Mon–Fri 7:30 AM – 6:00 PM · Sat–Sun 8:00 AM – 5:00 PM">
+          </div>
+          <button type="submit" class="btn btn-primary">Save Business Details</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 3: ORDERS & KITCHEN -->
+    <div id="tab3" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>Live Kitchen Display & Order Manager</span>
+          <button class="btn btn-outline btn-sm" onclick="seedSampleOrder()">+ Simulate Incoming Order</button>
+        </div>
+        <div id="ordersList">
+          <!-- Populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: AUDIT LOG -->
+    <div id="tab4" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-title">System & Change Audit Log</div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 14px;">Chronological history of all admin modifications, price updates, and photo uploads.</p>
+        <div id="auditList">
+          <!-- Populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: BACKUP & SYNC -->
+    <div id="tab5" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-title">Data Backup, Vercel & JSON Sync</div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">Export your customized menu and settings to JSON for backup, or restore to factory defaults.</p>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="exportMenuJSON()">📥 Download Menu JSON</button>
+          <label class="btn btn-outline" style="cursor: pointer;">
+            📤 Import Menu JSON
+            <input type="file" accept=".json" style="display: none;" onchange="importMenuJSON(this)">
+          </label>
+          <button class="btn btn-danger" onclick="confirmResetDefaults()">⚠️ Reset to Factory Defaults</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Dish Modal -->
+  <div id="adminDishModal" class="modal-backdrop">
+    <div class="modal-box">
+      <h3 id="adminModalTitle" style="margin-bottom: 16px; color: var(--espresso);">Edit Dish</h3>
+      <form id="adminDishForm" onsubmit="saveAdminDish(event)">
+        <input type="hidden" id="modalDishId">
+
+        <div class="form-group">
+          <label>Dish Name</label>
+          <input type="text" id="modalDishName" class="form-control" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Price ($ USD)</label>
+            <input type="number" step="0.05" id="modalDishPrice" class="form-control" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Category</label>
+            <select id="modalDishCat" class="form-control">
+              <option value="Morning">Morning Menu</option>
+              <option value="Sandwich">Sandwiches & Savoury</option>
+              <option value="Bakery">Bakery & Pastries</option>
+              <option value="Coffee">Specialty Coffee</option>
+              <option value="Beverages">Cold Beverages</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="modalDishDesc" class="form-control" rows="2"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Badge</label>
+            <input type="text" id="modalDishBadge" class="form-control" placeholder="e.g. VEGAN">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Stock Status</label>
+            <select id="modalDishStock" class="form-control">
+              <option value="true">In Stock</option>
+              <option value="false">Sold Out</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dish Photograph</label>
+          <input type="file" id="modalDishFileInput" accept="image/*" class="form-control" onchange="previewAdminModalPhoto(this)">
+          <input type="text" id="modalDishImgUrl" class="form-control" placeholder="Or enter Image URL" style="margin-top: 6px;" oninput="document.getElementById('adminPhotoPreview').style.backgroundImage = `url('${this.value}')`">
+          <div id="adminPhotoPreview" style="height: 120px; border-radius: 8px; background-size: cover; background-position: center; background-color: #eee; margin-top: 8px; border: 1px solid #ddd;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+          <button type="button" class="btn btn-outline" onclick="closeAdminDishModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Dish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Changes saved!</div>
+
+  <script>
+    const defaultMenu = [
+      { id: "sw_1", name: "Avocado Toast", price: 9.95, desc: "Sourdough toast topped with smashed avocado, lime, chili flakes, and microgreens.", cat: "Morning", badge: "VEGAN", inStock: true, img: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e2?w=600&auto=format&fit=crop" },
+      { id: "sw_6", name: "Pan con Chicharrón", price: 10.95, desc: "Crispy pork belly, fried sweet potato, and salsa criolla on fresh artisan bread.", cat: "Sandwich", badge: "POPULAR", inStock: true, img: "https://images.unsplash.com/photo-1509722747041-616f39b57569?w=600&auto=format&fit=crop" },
+      { id: "sw_3", name: "Classic Omelette", price: 13.95, desc: "Folded golden omelette served with seasoned home fries and herb salad.", cat: "Morning", badge: "CHEF SPECIAL", inStock: true, img: "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600&auto=format&fit=crop" },
+      { id: "p_1", name: "Peruvian Alfajores", price: 4.95, desc: "Handmade cornstarch shortbread cookies sandwiched with rich dulce de leche.", cat: "Bakery", badge: "HOMEMADE", inStock: true, img: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop" },
+      { id: "c_4", name: "Cortado", price: 4.00, desc: "Equal parts rich espresso and silky warm milk in a black ceramic glass.", cat: "Coffee", badge: "SPECIALTY", inStock: true, img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop" },
+      { id: "p_2", name: "Almond Croissant", price: 5.50, desc: "Flaky twice-baked croissant filled with rich almond frangipane cream.", cat: "Bakery", badge: "FRESH DAILY", inStock: true, img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop" },
+      { id: "sw_5", name: "Burrata Caprese", price: 14.95, desc: "Creamy fresh burrata with heirloom tomatoes, basil pesto, and aged balsamic reduction.", cat: "Sandwich", badge: "VEGETARIAN", inStock: true, img: "https://images.unsplash.com/photo-1592417817098-8f3d69109853?w=600&auto=format&fit=crop" }
+    ];
+
+    let currentMenu = JSON.parse(localStorage.getItem("artesano_menu") || JSON.stringify(defaultMenu));
+    let currentSettings = JSON.parse(localStorage.getItem("artesano_settings") || JSON.stringify({
+      status: "OPEN",
+      headline: "Fresh · Bright · Plant-Filled · Homemade · Daily",
+      subheadline: "Artisan neighbourhood café + bakery with Italian influence in Tribeca, New York City.",
+      morningWindow: "Morning Menu Served Daily 8:00 AM – 11:00 AM",
+      phone: "+1 212-372-0297",
+      address: "90 Chambers St Unit B, New York, NY 10007",
+      hours: "Mon–Fri 7:30 AM – 6:00 PM · Sat–Sun 8:00 AM – 5:00 PM"
+    }));
+    let auditLogs = JSON.parse(localStorage.getItem("artesano_audit") || JSON.stringify([
+      { text: "Admin portal session started", time: new Date().toLocaleTimeString() }
+    ]));
+    let orders = JSON.parse(localStorage.getItem("artesano_orders") || JSON.stringify([
+      { id: "ORD-101", customer: "Sarah Jenkins", items: "1x Avocado Toast, 1x Cortado", total: 13.95, status: "PREPARING", time: "10:14 AM" }
+    ]));
+
+    function checkLogin() {
+      const pin = document.getElementById("pinInput").value;
+      if (pin === "1234" || pin === "") {
+        document.getElementById("loginOverlay").style.display = "none";
+        sessionStorage.setItem("admin_auth", "true");
+        initAdmin();
+      } else {
+        alert("Invalid PIN. Use 1234 for manager access.");
+      }
+    }
+
+    function lockAdmin() {
+      sessionStorage.removeItem("admin_auth");
+      location.reload();
+    }
+
+    if (sessionStorage.getItem("admin_auth") === "true") {
+      document.getElementById("loginOverlay").style.display = "none";
+      initAdmin();
+    }
+
+    function initAdmin() {
+      renderDishes();
+      renderSettings();
+      renderAudit();
+      renderOrders();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      setTimeout(() => t.style.display = "none", 3000);
+    }
+
+    function addAudit(action) {
+      const entry = { text: action, time: new Date().toLocaleTimeString() };
+      auditLogs.unshift(entry);
+      if (auditLogs.length > 50) auditLogs.pop();
+      localStorage.setItem("artesano_audit", JSON.stringify(auditLogs));
+      renderAudit();
+    }
+
+    function switchTab(index) {
+      const tabs = document.querySelectorAll(".tab-btn");
+      const contents = document.querySelectorAll(".tab-content");
+      tabs.forEach((t, i) => t.classList.toggle("active", i === index));
+      contents.forEach((c, i) => c.style.display = i === index ? "block" : "none");
+    }
+
+    function renderDishes(filter = "") {
+      const container = document.getElementById("dishList");
+      container.innerHTML = "";
+      const filtered = currentMenu.filter(d => 
+        d.name.toLowerCase().includes(filter.toLowerCase()) || 
+        (d.cat && d.cat.toLowerCase().includes(filter.toLowerCase()))
+      );
+
+      filtered.forEach((dish, index) => {
+        const row = document.createElement("div");
+        row.className = "dish-row";
+        const isOut = dish.inStock === false;
+
+        row.innerHTML = `
+          <div class="dish-img-thumb" style="background-image: url('${dish.img || ''}')"></div>
+          <div class="dish-info">
+            <h4>
+              ${dish.name}
+              ${dish.badge ? `<span class="dish-cat-badge" style="background: var(--caramel); color: white;">${dish.badge}</span>` : ''}
+              ${isOut ? `<span class="dish-cat-badge" style="background: var(--red); color: white;">SOLD OUT</span>` : ''}
+            </h4>
+            <p>${dish.desc || ''}</p>
+            <div class="dish-meta">
+              <span class="dish-price">$${parseFloat(dish.price).toFixed(2)}</span>
+              <span class="dish-cat-badge">${dish.cat || 'General'}</span>
+            </div>
+          </div>
+          <div class="dish-actions">
+            <button class="btn btn-outline btn-sm" onclick="openEditModal('${dish.id}')">✏️ Edit</button>
+            <label class="btn btn-outline btn-sm" style="cursor: pointer;">
+              📷 Photo
+              <input type="file" accept="image/*" style="display:none;" onchange="uploadRowPhoto('${dish.id}', this)">
+            </label>
+            <button class="btn btn-outline btn-sm" onclick="toggleDishStock('${dish.id}')">
+              ${isOut ? 'Mark In Stock' : 'Mark Sold Out'}
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="moveDish('${dish.id}', -1)" title="Move Up">↑</button>
+            <button class="btn btn-outline btn-sm" onclick="moveDish('${dish.id}', 1)" title="Move Down">↓</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteDish('${dish.id}')">✕</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function filterDishList() {
+      const q = document.getElementById("adminSearchInput").value;
+      renderDishes(q);
+    }
+
+    function openEditModal(id) {
+      const dish = currentMenu.find(d => d.id === id);
+      if (!dish) return;
+      document.getElementById("adminModalTitle").textContent = "Edit Dish: " + dish.name;
+      document.getElementById("modalDishId").value = dish.id;
+      document.getElementById("modalDishName").value = dish.name;
+      document.getElementById("modalDishPrice").value = dish.price;
+      document.getElementById("modalDishCat").value = dish.cat || "Morning";
+      document.getElementById("modalDishDesc").value = dish.desc || "";
+      document.getElementById("modalDishBadge").value = dish.badge || "";
+      document.getElementById("modalDishStock").value = dish.inStock !== false ? "true" : "false";
+      document.getElementById("modalDishImgUrl").value = dish.img || "";
+      document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${dish.img || ''}')`;
+      document.getElementById("adminDishModal").style.display = "flex";
+    }
+
+    function openAddDishModal() {
+      document.getElementById("adminModalTitle").textContent = "Add New Dish";
+      document.getElementById("modalDishId").value = "";
+      document.getElementById("modalDishName").value = "";
+      document.getElementById("modalDishPrice").value = "9.50";
+      document.getElementById("modalDishCat").value = "Morning";
+      document.getElementById("modalDishDesc").value = "";
+      document.getElementById("modalDishBadge").value = "NEW";
+      document.getElementById("modalDishStock").value = "true";
+      const defaultImg = "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop";
+      document.getElementById("modalDishImgUrl").value = defaultImg;
+      document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${defaultImg}')`;
+      document.getElementById("adminDishModal").style.display = "flex";
+    }
+
+    function closeAdminDishModal() {
+      document.getElementById("adminDishModal").style.display = "none";
+    }
+
+    function previewAdminModalPhoto(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("modalDishImgUrl").value = e.target.result;
+          document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${e.target.result}')`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function saveAdminDish(e) {
+      e.preventDefault();
+      const id = document.getElementById("modalDishId").value;
+      const name = document.getElementById("modalDishName").value;
+      const price = parseFloat(document.getElementById("modalDishPrice").value);
+      const cat = document.getElementById("modalDishCat").value;
+      const desc = document.getElementById("modalDishDesc").value;
+      const badge = document.getElementById("modalDishBadge").value;
+      const inStock = document.getElementById("modalDishStock").value === "true";
+      const img = document.getElementById("modalDishImgUrl").value;
+
+      if (id) {
+        const item = currentMenu.find(d => d.id === id);
+        if (item) {
+          item.name = name;
+          item.price = price;
+          item.cat = cat;
+          item.desc = desc;
+          item.badge = badge;
+          item.inStock = inStock;
+          if (img) item.img = img;
+          addAudit(`Updated dish "${name}" ($${price.toFixed(2)})`);
+        }
+      } else {
+        const newDish = {
+          id: "custom_" + Date.now(),
+          name, price, cat, desc, badge, inStock,
+          img: img || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop"
+        };
+        currentMenu.unshift(newDish);
+        addAudit(`Created new dish "${name}" ($${price.toFixed(2)})`);
+      }
+
+      localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+      renderDishes();
+      closeAdminDishModal();
+      showToast("Dish saved successfully!");
+    }
+
+    function uploadRowPhoto(id, input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const item = currentMenu.find(d => d.id === id);
+          if (item) {
+            item.img = e.target.result;
+            localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+            renderDishes();
+            addAudit(`Changed photo for "${item.name}"`);
+            showToast(`Photograph updated for ${item.name}!`);
+          }
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function toggleDishStock(id) {
+      const item = currentMenu.find(d => d.id === id);
+      if (item) {
+        item.inStock = item.inStock === false ? true : false;
+        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        renderDishes();
+        addAudit(`Toggled stock for "${item.name}" (${item.inStock ? 'In Stock' : 'Sold Out'})`);
+        showToast(`Stock updated for ${item.name}`);
+      }
+    }
+
+    function moveDish(id, delta) {
+      const index = currentMenu.findIndex(d => d.id === id);
+      if (index < 0) return;
+      const target = index + delta;
+      if (target >= 0 && target < currentMenu.length) {
+        const temp = currentMenu[index];
+        currentMenu[index] = currentMenu[target];
+        currentMenu[target] = temp;
+        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        renderDishes();
+        addAudit(`Reordered "${temp.name}"`);
+      }
+    }
+
+    function deleteDish(id) {
+      const item = currentMenu.find(d => d.id === id);
+      if (confirm(`Are you sure you want to delete "${item?.name}"?`)) {
+        currentMenu = currentMenu.filter(d => d.id !== id);
+        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        renderDishes();
+        addAudit(`Deleted dish "${item?.name}"`);
+        showToast("Dish deleted from menu.");
+      }
+    }
+
+    // Status & Banners
+    function setStatus(st) {
+      currentSettings.status = st;
+      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
+      updateStatusButtons(st);
+      addAudit(`Changed store status to: ${st}`);
+      showToast(`Store status updated to ${st}`);
+    }
+
+    function updateStatusButtons(st) {
+      document.getElementById("btnOpen").className = "status-btn " + (st === "OPEN" ? "active-open" : "");
+      document.getElementById("btnClosed").className = "status-btn " + (st === "CLOSED" ? "active-closed" : "");
+      document.getElementById("btnTemp").className = "status-btn " + (st === "TEMPORARILY_CLOSED" ? "active-temp" : "");
+    }
+
+    function renderSettings() {
+      if (currentSettings.headline) document.getElementById("headlineInput").value = currentSettings.headline;
+      if (currentSettings.subheadline) document.getElementById("subheadlineInput").value = currentSettings.subheadline;
+      if (currentSettings.morningWindow) document.getElementById("morningInput").value = currentSettings.morningWindow;
+      if (currentSettings.announcement) document.getElementById("announcementInput").value = currentSettings.announcement;
+      if (currentSettings.address) document.getElementById("storeAddressInput").value = currentSettings.address;
+      if (currentSettings.phone) document.getElementById("storePhoneInput").value = currentSettings.phone;
+      if (currentSettings.hours) document.getElementById("storeHoursInput").value = currentSettings.hours;
+      updateStatusButtons(currentSettings.status || "OPEN");
+    }
+
+    function saveBanners(e) {
+      e.preventDefault();
+      currentSettings.headline = document.getElementById("headlineInput").value;
+      currentSettings.subheadline = document.getElementById("subheadlineInput").value;
+      currentSettings.morningWindow = document.getElementById("morningInput").value;
+      currentSettings.announcement = document.getElementById("announcementInput").value;
+      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
+      addAudit("Published updated banners & announcements");
+      showToast("Banners published successfully!");
+    }
+
+    function saveStoreDetails(e) {
+      e.preventDefault();
+      currentSettings.address = document.getElementById("storeAddressInput").value;
+      currentSettings.phone = document.getElementById("storePhoneInput").value;
+      currentSettings.hours = document.getElementById("storeHoursInput").value;
+      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
+      addAudit("Updated store contact & hours");
+      showToast("Store details saved!");
+    }
+
+    function uploadLogoFile(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentSettings.logo = e.target.result;
+          localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
+          addAudit("Uploaded custom brand logo");
+          showToast("Logo updated!");
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function uploadHeroFile(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentSettings.heroImg = e.target.result;
+          localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
+          addAudit("Uploaded custom hero banner photo");
+          showToast("Hero banner updated!");
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Orders & Kitchen
+    function renderOrders() {
+      const container = document.getElementById("ordersList");
+      container.innerHTML = "";
+      if (orders.length === 0) {
+        container.innerHTML = "<p style='color: #888;'>No active orders.</p>";
+        return;
+      }
+      orders.forEach(ord => {
+        const card = document.createElement("div");
+        card.className = "order-card";
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>${ord.id} · ${ord.customer}</strong>
+            <span class="dish-cat-badge" style="background: var(--espresso); color: white;">${ord.status}</span>
+          </div>
+          <p style="font-size: 13px; color: #555;">${ord.items}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <span style="font-weight: 700; color: var(--caramel);">$${parseFloat(ord.total).toFixed(2)}</span>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-outline btn-sm" onclick="advanceOrderStatus('${ord.id}')">Advance Status →</button>
+              <button class="btn btn-danger btn-sm" onclick="refundOrder('${ord.id}')">Refund</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function advanceOrderStatus(id) {
+      const ord = orders.find(o => o.id === id);
+      if (!ord) return;
+      const flow = { "RECEIVED": "PREPARING", "PREPARING": "READY", "READY": "COMPLETED", "COMPLETED": "COMPLETED" };
+      ord.status = flow[ord.status] || "COMPLETED";
+      localStorage.setItem("artesano_orders", JSON.stringify(orders));
+      renderOrders();
+      addAudit(`Advanced ${id} to ${ord.status}`);
+      showToast(`Order status: ${ord.status}`);
+    }
+
+    function refundOrder(id) {
+      const reason = prompt("Refund reason:", "Guest cancellation");
+      if (reason) {
+        const ord = orders.find(o => o.id === id);
+        if (ord) {
+          ord.status = "REFUNDED (" + reason + ")";
+          localStorage.setItem("artesano_orders", JSON.stringify(orders));
+          renderOrders();
+          addAudit(`Refunded order ${id}: ${reason}`);
+          showToast(`Order refunded`);
+        }
+      }
+    }
+
+    function seedSampleOrder() {
+      const newOrd = {
+        id: "ORD-" + Math.floor(100 + Math.random() * 900),
+        customer: "Tribeca Guest",
+        items: "1x Pan con Chicharrón, 1x Peruvian Alfajores",
+        total: 15.90,
+        status: "RECEIVED",
+        time: new Date().toLocaleTimeString()
+      };
+      orders.unshift(newOrd);
+      localStorage.setItem("artesano_orders", JSON.stringify(orders));
+      renderOrders();
+      addAudit(`New incoming order ${newOrd.id}`);
+      showToast(`New order received!`);
+    }
+
+    // Audit Log
+    function renderAudit() {
+      const container = document.getElementById("auditList");
+      container.innerHTML = "";
+      auditLogs.forEach(entry => {
+        const d = document.createElement("div");
+        d.className = "audit-entry";
+        d.innerHTML = `
+          <div>${entry.text}</div>
+          <div class="audit-time">${entry.time}</div>
+        `;
+        container.appendChild(d);
+      });
+    }
+
+    // Backup & Reset
+    function exportMenuJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentMenu, null, 2));
+      const a = document.createElement("a");
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", "artesano_menu.json");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Menu JSON exported!");
+    }
+
+    function importMenuJSON(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const imported = JSON.parse(e.target.result);
+            if (Array.isArray(imported)) {
+              currentMenu = imported;
+              localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+              renderDishes();
+              addAudit("Imported menu from external JSON");
+              showToast("Menu JSON imported successfully!");
+            }
+          } catch(err) {
+            alert("Invalid JSON format.");
+          }
+        };
+        reader.readAsText(input.files[0]);
+      }
+    }
+
+    function confirmResetDefaults() {
+      if (confirm("Reset menu and settings to factory defaults? Any custom items will be restored to seed values.")) {
+        currentMenu = JSON.parse(JSON.stringify(defaultMenu));
+        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        localStorage.removeItem("artesano_settings");
+        currentSettings = { status: "OPEN" };
+        renderDishes();
+        renderSettings();
+        addAudit("Reset to factory defaults");
+        showToast("Restored default Tribeca artisan menu.");
+      }
+    }
+  </script>
+</body>
+</html>
