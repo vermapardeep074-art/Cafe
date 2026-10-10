@@ -1,0 +1,6 @@
+{
+  "name": "Artesano Cafe",
+  "description": "Artisan neighbourhood café & bakery in Tribeca, NYC. Handcrafted espresso, morning menu, freshly baked pastries, and seamless ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
