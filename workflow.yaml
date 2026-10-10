@@ -1,0 +1,300 @@
+# ==============================================================================
+# ARTESANO CAFE — END-TO-END DIGITAL PLATFORM & APK RELEASE WORKFLOW
+# ==============================================================================
+# Brand: Artesano Cafe ("Fresh · Bright · Plant-Filled · Homemade · Daily")
+# Location: 90 Chambers St Unit B, New York, NY 10007, United States
+# Concept: Artisan neighbourhood café + bakery with Italian influence ("Ristorante Italiano")
+# Architecture: Android Native (Kotlin + Jetpack Compose) & Modern Headless Web Stack
+# Workflow Standard: Production-grade YAML specification for design, build, launch & CI/CD
+# ==============================================================================
+
+metadata:
+  workflow_version: "2.4.0"
+  project_name: "Artesano Cafe Digital Platform & Mobile App"
+  cafe_name: "Artesano Cafe"
+  concept: "Artisan neighbourhood café + bakery with Italian influence ('Ristorante Italiano')"
+  location: "90 Chambers St Unit B, New York, NY 10007, United States"
+  phone: "+1 212-372-0297"
+  budget_tier: "premium"
+  timeline_weeks: 6
+  primary_conversion_goal: "Direct online mobile orders, Kerbside pickup, & Dine-in table ordering"
+  tech_stack:
+    client_mobile: "Android Native 14+ (Kotlin 2.0+, Jetpack Compose, Material 3, Coroutines, Flow)"
+    networking_and_data: "Retrofit / Ktor, Room Database, Coil Compose Image Loading"
+    design_system: "Luxury Palette (#2A1E17 Espresso, #B9793A Warm Caramel, #D9B36C Soft Gold, #F6F1E7 Cream)"
+    ci_cd_engine: "GitHub Actions (.github/workflows/build-apk.yml) + Gradle 9.3+"
+    payment_gateways: "Stripe PaymentElement, Google Pay (Google Wallet), Apple Pay, Encrypted Card Vault"
+    pos_integration: "Square / Toast POS Cloud Webhooks & Inventory Sync"
+
+# ==============================================================================
+# PROJECT ASSUMPTIONS & PREREQUISITES
+# ==============================================================================
+assumptions:
+  - id: "ASSUMP-001"
+    statement: "Store status default is controllable via in-app Admin Portal with real-time customer state sync."
+    impact: "Banner displays Open, Closed, or Temporarily Closed with automatic cart gatekeeping."
+  - id: "ASSUMP-002"
+    statement: "NYC Sales Tax is hardcoded to the statutory 8.875% combined NYC + State tax rate."
+    impact: "All subtotal and checkout summaries compute accurate sales tax and itemized tips (10%, 15%, 20%, Custom)."
+  - id: "ASSUMP-003"
+    statement: "Morning Menu is featured daily between 08:00 AM – 11:00 AM America/New_York (EST/EDT)."
+    impact: "Dynamic highlight banners and category badges prioritize breakfast & omelettes during morning hours."
+  - id: "ASSUMP-004"
+    statement: "Both USD ($) and INR (₹) pricing display are supported for international and tourist clientele."
+    impact: "Dynamic one-tap currency toggle with 1 USD = 83 INR conversion rate throughout the app."
+  - id: "ASSUMP-005"
+    statement: "APK CI/CD builds debug APK automatically and signs release APK when secret keys are provided."
+    impact: "Continuous zero-failure build verification in both local Gradle environments and cloud runners."
+
+# ==============================================================================
+# RACI TEAM MATRIX
+# ==============================================================================
+roles:
+  lead_engineer:
+    title: "Senior Full-Stack & Android Lead"
+    responsibilities: "Jetpack Compose architecture, state management, payment tokenization, build tooling"
+  ux_ui_designer:
+    title: "Luxury Brand & UX Designer"
+    responsibilities: "Material 3 design system, typography hierarchy, custom photography art direction"
+  qa_engineer:
+    title: "Lead QA & Test Automation Specialist"
+    responsibilities: "Robolectric JVM unit testing, Compose UI test harnesses, payment regression suites"
+  devops_engineer:
+    title: "DevOps & CI/CD Engineer"
+    responsibilities: "GitHub Actions workflow, keystore signing, Gradle caching, APK artifact verification"
+  store_manager:
+    title: "Artesano Operations Lead / Store General Manager"
+    responsibilities: "Menu item pricing verification, real-time store hours toggle, kitchen order workflows"
+  marketing_lead:
+    title: "Brand & Growth Marketing Director"
+    responsibilities: "Local SEO, Tribeca push notification campaigns, promo code lifecycle (e.g. ARTESANO10)"
+
+# ==============================================================================
+# WORKFLOW EXECUTION PHASES
+# ==============================================================================
+phases:
+
+  # ----------------------------------------------------------------------------
+  # PHASE 1: DISCOVERY, BRAND IDENTITY & ARCHITECTURE
+  # ----------------------------------------------------------------------------
+  - phase_id: "PHASE-01"
+    name: "Brand Foundation & Client Architecture Setup"
+    duration_days: 5
+    lead_role: "lead_engineer"
+    deliverables:
+      - "Luxury Brand Design System specification"
+      - "Android Architecture Repository & ViewModel scaffolding"
+      - "Custom Adaptive App Icon generation across all Android mipmap densities"
+    tasks:
+      - task_id: "T-0101"
+        name: "Define Luxury Color Tokens and Typography System"
+        owner: "ux_ui_designer"
+        dependencies: []
+        acceptance_criteria:
+          - "Color.kt implements Espresso Brown (#2A1E17), Warm Caramel (#B9793A), Soft Gold (#D9B36C), Cream (#F6F1E7)"
+          - "MaterialTheme provides seamless Light/Dark mode transitions"
+        status: "COMPLETED"
+
+      - task_id: "T-0102"
+        name: "Generate Production Adaptive App Icons"
+        owner: "lead_engineer"
+        dependencies: ["T-0101"]
+        acceptance_criteria:
+          - "Vector drawable foreground created with Artesano gold coffee emblem and wheat stalks"
+          - "Mipmap densities (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi) generated and verified"
+        status: "COMPLETED"
+
+      - task_id: "T-0103"
+        name: "Scaffold Model, Repository and ViewModel Layer"
+        owner: "lead_engineer"
+        dependencies: ["T-0101"]
+        acceptance_criteria:
+          - "MenuItem, CartItem, Order, StoreSettings, and AuditLog data models implemented"
+          - "ArtesanoRepository initialized with authentic printed menu and full descriptions"
+        status: "COMPLETED"
+
+  # ----------------------------------------------------------------------------
+  # PHASE 2: AUTHENTIC MENU CATALOG & RICH MEDIA INTEGRATION
+  # ----------------------------------------------------------------------------
+  - phase_id: "PHASE-02"
+    name: "Menu Catalog, Photography & Real-time State Management"
+    duration_days: 7
+    lead_role: "store_manager"
+    deliverables:
+      - "Authentic Tribeca printed menu items with exact prices and descriptions"
+      - "Full-resolution food photography for high-converting signature dishes"
+      - "Dual currency calculation engine (USD and INR)"
+    tasks:
+      - task_id: "T-0201"
+        name: "Catalog Morning Menu & Savoury Sandwich Options"
+        owner: "store_manager"
+        dependencies: ["T-0103"]
+        acceptance_criteria:
+          - "Pan con Chicharrón ($10.95), Avocado Toast ($9.95), Bacon Egg & Cheese ($8.95) mapped"
+          - "Classic Omelette ($13.95) and Veggie Omelette ($15.95) configured with home fries & salad notes"
+        status: "COMPLETED"
+
+      - task_id: "T-0202"
+        name: "Catalog Artisan Bakery & Espresso Beverage Collection"
+        owner: "store_manager"
+        dependencies: ["T-0103"]
+        acceptance_criteria:
+          - "Peruvian Alfajores ($4.95), Almond Croissants ($5.50), Pain au Chocolat ($5.25) added"
+          - "Cortado ($4.00), Flat White ($4.75), Matcha Latte ($5.50) with milk choices (Oat, Almond, Whole)"
+        status: "COMPLETED"
+
+      - task_id: "T-0203"
+        name: "Link Visual Assets & Image Rescaling"
+        owner: "ux_ui_designer"
+        dependencies: ["T-0201", "T-0202"]
+        acceptance_criteria:
+          - "High quality drawables linked in R.drawable without runtime out-of-memory overhead"
+          - "Fallbacks gracefully handled with brand logo"
+        status: "COMPLETED"
+
+  # ----------------------------------------------------------------------------
+  # PHASE 3: FAST-ORDERING UX & INTERACTIVE SCREENS
+  # ----------------------------------------------------------------------------
+  - phase_id: "PHASE-03"
+    name: "KFC/McDonald's Grade Ordering Flow & Material 3 Screens"
+    duration_days: 10
+    lead_role: "lead_engineer"
+    deliverables:
+      - "Home Screen with hero banner, live status pill, and featured carousels"
+      - "Filterable Menu Screen with categories, dietary chips, and live search"
+      - "Interactive Item Customization Dialog with size, milk, and extra add-ons"
+      - "Slide-in Cart & Frictionless Multi-step Checkout"
+    tasks:
+      - task_id: "T-0301"
+        name: "Implement Luxury Home Dashboard and Banners"
+        owner: "lead_engineer"
+        dependencies: ["T-0203"]
+        acceptance_criteria:
+          - "Live store status banner (Open / Closed / Temporarily Closed) with admin toggle"
+          - "Morning Menu Highlight Banner active between 8:00 AM – 11:00 AM"
+        status: "COMPLETED"
+
+      - task_id: "T-0302"
+        name: "Implement Item Detail Modal & Add-to-Cart Flow"
+        owner: "lead_engineer"
+        dependencies: ["T-0301"]
+        acceptance_criteria:
+          - "Milk modifiers (Whole, Oat +$0.75, Almond +$0.75, Soy +$0.75)"
+          - "Add-on checkboxes (Extra Shot +$1.25, Vanilla +$0.75, Caramel +$0.75)"
+          - "Special instructions free-text notes field"
+        status: "COMPLETED"
+
+      - task_id: "T-0303"
+        name: "Cart Screen with Instant Promo Codes & Tip Selectors"
+        owner: "lead_engineer"
+        dependencies: ["T-0302"]
+        acceptance_criteria:
+          - "Promo codes 'ARTESANO10' (10% off) and 'TRIBECA' (15% off) validated dynamically"
+          - "NYC statutory tax (8.875%) calculated and itemized"
+          - "Interactive tip buttons (10%, 15%, 20%, No Tip, Custom)"
+        status: "COMPLETED"
+
+  # ----------------------------------------------------------------------------
+  # PHASE 4: PAYMENTS, REAL-TIME TRACKING & ADMIN SYSTEM
+  # ----------------------------------------------------------------------------
+  - phase_id: "PHASE-04"
+    name: "Secure Checkout, Live Order Tracking & Management Portal"
+    duration_days: 6
+    lead_role: "lead_engineer"
+    deliverables:
+      - "Encrypted Checkout Flow (Credit Card, Apple Pay, Google Pay, In-Store)"
+      - "Live Stepper Order Tracking Screen with countdown estimation"
+      - "Owner Admin Screen for live status, pricing changes, and stock controls"
+    tasks:
+      - task_id: "T-0401"
+        name: "Build Secure Payment Flow & Idempotent Order Dispatch"
+        owner: "lead_engineer"
+        dependencies: ["T-0303"]
+        acceptance_criteria:
+          - "Client-side card format validation (Luhn algorithm check, expiry date format)"
+          - "Simulated payment processing delay with progress indicator"
+          - "Unique alphanumeric order number generation (e.g., #ART-4821)"
+        status: "COMPLETED"
+
+      - task_id: "T-0402"
+        name: "Build Real-Time Order Tracking Timeline"
+        owner: "lead_engineer"
+        dependencies: ["T-0401"]
+        acceptance_criteria:
+          - "4-step animated timeline: Received -> Preparing -> Ready / Out -> Completed"
+          - "Call café button (+1 212-372-0297) and cancel/refund controls"
+        status: "COMPLETED"
+
+      - task_id: "T-0403"
+        name: "Build Café Owner Admin Console"
+        owner: "lead_engineer"
+        dependencies: ["T-0401"]
+        acceptance_criteria:
+          - "PIN-gated access (default PIN: 1234)"
+          - "Instant open/closed status toggle"
+          - "Real-time item price editor and in-stock toggle switch"
+          - "Audit log tracking all changes with timestamps"
+        status: "COMPLETED"
+
+  # ----------------------------------------------------------------------------
+  # PHASE 5: CONTINUOUS INTEGRATION & AUTOMATED APK BUILD WORKFLOW
+  # ----------------------------------------------------------------------------
+  - phase_id: "PHASE-05"
+    name: "Automated GitHub Actions CI/CD & Build Pipeline"
+    duration_days: 3
+    lead_role: "devops_engineer"
+    deliverables:
+      - ".github/workflows/build-apk.yml automated workflow"
+      - "100% passing local and cloud Gradle tasks (:app:assembleDebug, :app:testDebugUnitTest)"
+      - "Automated artifact packaging and release distribution"
+    tasks:
+      - task_id: "T-0501"
+        name: "Create Production GitHub Actions Workflow for APK Compilation"
+        owner: "devops_engineer"
+        dependencies: []
+        acceptance_criteria:
+          - "Workflow triggers on push, pull_request, and workflow_dispatch"
+          - "Restores debug.keystore from base64 secret or auto-generates if missing"
+          - "Executes ./gradlew assembleDebug without failures"
+          - "Uploads generated APK artifact (ArtesanoCafe-APK) with 30-day retention"
+        status: "COMPLETED"
+
+      - task_id: "T-0502"
+        name: "Verify Robolectric and Unit Test Suites"
+        owner: "qa_engineer"
+        dependencies: ["T-0501"]
+        acceptance_criteria:
+          - "Context string verification passes in Robolectric runner"
+          - "Unit test runner exits with code 0"
+        status: "COMPLETED"
+
+      - task_id: "T-0503"
+        name: "Execute Zero-Error Clean Build Verification"
+        owner: "lead_engineer"
+        dependencies: ["T-0501", "T-0502"]
+        acceptance_criteria:
+          - "gradle assembleDebug completes successfully"
+          - "APK binary verified in app/build/outputs/apk/debug/app-debug.apk"
+        status: "COMPLETED"
+
+# ==============================================================================
+# RISK REGISTER & CONTINGENCY ACTIONS
+# ==============================================================================
+risks:
+  - risk_id: "RISK-01"
+    description: "Keystore missing or corrupt on cloud runner causing build failure"
+    likelihood: "LOW"
+    severity: "HIGH"
+    mitigation: "Workflow script decodes base64 keystore automatically or generates an ad-hoc signing certificate on the fly."
+
+  - risk_id: "RISK-02"
+    description: "Peak rush hour order bottlenecks at Tribeca counter"
+    likelihood: "MEDIUM"
+    severity: "MEDIUM"
+    mitigation: "Admin panel allows instant store status switch to 'Temporarily closed' or pausing individual high-prep items."
+
+  - risk_id: "RISK-03"
+    description: "Customer network drop during payment authorization"
+    likelihood: "MEDIUM"
+    severity: "HIGH"
+    mitigation: "Idempotent order token generation and state preservation in ViewModel and Room persistent cache."
