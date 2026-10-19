@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-client.js"></script>
   <style>
     :root {
       --espresso: #2A1E17;
@@ -26,6 +28,43 @@
       color: var(--charcoal);
       padding-bottom: 80px;
     }
+    
+    /* Login Barrier Overlay */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(42, 30, 23, 0.94);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-box {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      border: 1px solid var(--gold);
+    }
+    .login-logo {
+      width: 60px; height: 60px;
+      background: var(--espresso);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      border: 2px solid var(--gold);
+    }
+    
+    /* Top Nav */
     .admin-nav {
       background: var(--espresso);
       color: var(--white);
@@ -60,12 +99,15 @@
       display: flex;
       gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
     .container {
-      max-width: 1080px;
+      max-width: 1100px;
       margin: 24px auto;
       padding: 0 16px;
     }
+
+    /* Tabs */
     .admin-tabs {
       display: flex;
       gap: 8px;
@@ -90,6 +132,8 @@
       color: white;
       border-color: var(--caramel);
     }
+
+    /* Cards */
     .card {
       background: var(--white);
       border-radius: 14px;
@@ -98,17 +142,38 @@
       margin-bottom: 24px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
     .card-title {
       font-size: 17px;
       font-weight: 700;
       color: var(--espresso);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
     }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+    .metric-label { font-size: 11px; font-weight: 700; color: #777; text-transform: uppercase; margin-bottom: 6px; }
+    .metric-val { font-size: 26px; font-weight: 800; color: var(--espresso); }
+
+    /* Buttons */
     .btn {
       padding: 10px 18px;
       border-radius: 8px;
@@ -118,6 +183,7 @@
       border: none;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       transition: all 0.2s;
       text-decoration: none;
@@ -127,61 +193,94 @@
     .btn-danger { background: var(--red); color: var(--white); }
     .btn-danger:hover { background: #a81d1d; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--charcoal); }
+    .btn-outline:hover { background: #F0F0F0; }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
-    .btn-group { display: flex; gap: 8px; }
-    
-    .status-btn {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      background: white;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .status-btn.active-open { background: var(--green); color: white; border-color: var(--green); }
-    .status-btn.active-closed { background: var(--red); color: white; border-color: var(--red); }
-    .status-btn.active-temp { background: #E65100; color: white; border-color: #E65100; }
-    
+
+    /* Dish Rows */
     .dish-row {
       display: flex;
       align-items: center;
       gap: 16px;
       padding: 14px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid #F0F0F0;
       flex-wrap: wrap;
     }
     .dish-img-thumb {
-      width: 64px;
-      height: 64px;
+      width: 64px; height: 64px;
       border-radius: 8px;
       background-size: cover;
       background-position: center;
-      background-color: #eee;
+      background-color: #EEE;
       flex-shrink: 0;
-      border: 1px solid #ddd;
+      border: 1px solid #DDD;
     }
-    .dish-info { flex: 1; min-width: 200px; }
+    .dish-info { flex: 1; min-width: 220px; }
     .dish-info h4 { font-size: 15px; margin-bottom: 2px; color: var(--espresso); display: flex; align-items: center; gap: 6px; }
     .dish-info p { font-size: 12px; color: #666; }
     .dish-meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
-    .dish-price { font-weight: 700; color: var(--caramel); font-size: 15px; }
-    .dish-cat-badge { font-size: 10px; font-weight: 700; background: #eee; padding: 2px 6px; border-radius: 4px; }
+    .dish-price { font-weight: 800; color: var(--caramel); font-size: 15px; }
+    .dish-cat-badge { font-size: 10px; font-weight: 700; background: #EEE; padding: 2px 6px; border-radius: 4px; }
     .dish-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
+    /* Orders & Reservations */
+    .order-card {
+      background: #FFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .order-status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .status-RECEIVED { background: #E3F2FD; color: #1565C0; }
+    .status-PREPARING { background: #FFF3E0; color: #E65100; }
+    .status-READY { background: #E8F5E9; color: #2E7D32; }
+    .status-COMPLETED { background: #ECEFF1; color: #455A64; }
+    .status-CANCELLED, .status-REFUNDED { background: #FFEBEE; color: #C62828; }
+    .status-PENDING { background: #FFF8E1; color: #F57F17; }
+    .status-CONFIRMED, .status-SEATED { background: #E8F5E9; color: #2E7D32; }
+
+    /* Forms & Inputs */
     .form-group { margin-bottom: 16px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #555; }
     .form-control {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid #ccc;
+      border: 1px solid #CCC;
       border-radius: 8px;
       font-size: 14px;
       font-family: inherit;
     }
-    .form-row { display: flex; gap: 12px; }
+    .form-control:focus { outline: none; border-color: var(--caramel); }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 540px;
+      padding: 26px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
 
     .toast {
       position: fixed;
@@ -191,231 +290,380 @@
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      font-size: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      font-size: 13px;
       font-weight: 600;
       display: none;
       z-index: 1000;
       border: 1px solid var(--gold);
     }
-    #loginOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(18, 18, 18, 0.92);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      padding: 20px;
-    }
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(18, 18, 18, 0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 900;
-      padding: 20px;
-    }
-    .modal-box {
-      background: white;
-      border-radius: 14px;
-      padding: 24px;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .audit-entry {
-      padding: 10px 12px;
-      border-left: 3px solid var(--caramel);
-      background: #faf8f5;
-      margin-bottom: 8px;
-      border-radius: 0 6px 6px 0;
-      font-size: 13px;
-    }
-    .audit-time { font-size: 11px; color: #888; margin-top: 2px; }
-    .order-card {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-      background: white;
-    }
   </style>
 </head>
 <body>
-  <!-- Protected Login -->
-  <div id="loginOverlay">
-    <div class="card" style="width: 380px; text-align: center; margin-bottom: 0;">
-      <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--espresso); color: var(--gold); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">A</div>
-      <h2 style="font-size: 20px; margin-bottom: 4px; color: var(--espresso);">Artesano Cafe</h2>
-      <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Manager & Owner Verification</p>
-      <div class="form-group" style="text-align: left;">
-        <label>PIN (Default: 1234)</label>
-        <input type="password" id="pinInput" class="form-control" placeholder="Enter PIN" value="1234">
+
+  <!-- Fullscreen Login & Initialization Barrier -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box" id="loginBox">
+      <div class="login-logo">A</div>
+      <h2 style="font-size: 22px; color: var(--espresso); margin-bottom: 6px;">Artesano Cafe</h2>
+      <p style="font-size: 13px; color: #666; margin-bottom: 18px;">Owner &amp; Staff Administration Portal</p>
+      
+      <div id="cloudStatusNotice" style="background: #FFF8E1; border: 1px solid #FFE082; color: #F57F17; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: left;">
+        <strong>Database Status:</strong> <span id="authCloudStatusText">Detecting connection...</span>
       </div>
-      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="checkLogin()">Unlock Live Admin CMS</button>
-      <button class="btn btn-outline" style="width: 100%; margin-top: 8px; font-size: 12px; justify-content: center;" onclick="document.getElementById('pinInput').value='1234'; checkLogin();">Quick Demo Unlock (1234)</button>
+
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group" style="text-align: left;">
+          <label>Administrator Email</label>
+          <input type="email" id="adminEmailInput" class="form-control" placeholder="owner@artesanocafe.com" required autocomplete="username">
+        </div>
+
+        <div class="form-group" style="text-align: left;">
+          <label>Administrator Password</label>
+          <input type="password" id="adminPasswordInput" class="form-control" placeholder="Enter secure password" required autocomplete="current-password">
+        </div>
+        
+        <p id="loginErrorMsg" style="color: var(--red); font-size: 12px; font-weight: 700; margin-bottom: 12px; display: none; text-align: left;">
+          Authentication failed.
+        </p>
+
+        <button type="submit" id="btnLoginSubmit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 14px;">
+          Sign In to Owner CMS
+        </button>
+      </form>
+      
+      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid #EEE; display: flex; justify-content: space-between; font-size: 12px;">
+        <a href="#" onclick="openCloudConfigModal(); return false;" style="color: var(--caramel); font-weight: 700; text-decoration: underline;">
+          ⚙️ Cloud Database Config
+        </a>
+        <a href="/" target="_blank" style="color: #666; text-decoration: none;">
+          ← Public Website
+        </a>
+      </div>
     </div>
   </div>
 
-  <nav class="admin-nav">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <h1>🛡️ Artesano Cafe — Live Admin CMS</h1>
-      <span class="badge-mode">NO-CODE LIVE EDITOR</span>
-    </div>
-    <div class="nav-buttons">
-      <a href="/" target="_blank" class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.3);">View Live Website</a>
-      <button class="btn btn-danger btn-sm" onclick="lockAdmin()">Lock</button>
-    </div>
-  </nav>
+  <!-- Cloud Database Setup Modal -->
+  <div id="cloudConfigModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 18px; color: var(--espresso);">Supabase Cloud Database Settings</h3>
+        <button onclick="closeCloudConfigModal()" style="background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: #666; margin-bottom: 16px;">
+        Connect your Supabase project to enable real multi-device cloud synchronization, PostgreSQL Row Level Security (RLS), and live kitchen order alerts.
+      </p>
 
-  <div class="container">
+      <form onsubmit="saveCloudConfig(event)">
+        <div class="form-group">
+          <label>Supabase Project URL</label>
+          <input type="url" id="cfgSupabaseUrl" class="form-control" placeholder="https://xyzcompany.supabase.co" required>
+          <small style="color: #888; font-size: 11px;">Found under Project Settings &gt; API in your Supabase dashboard.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Supabase Anon / Public API Key</label>
+          <input type="text" id="cfgSupabaseAnonKey" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+          <small style="color: #888; font-size: 11px;">Use the safe <strong>anon / public</strong> key only. Never paste your service_role secret key.</small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeCloudConfigModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save &amp; Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Top Admin Bar -->
+  <header class="admin-nav">
+    <h1>
+      <span>Artesano Cafe</span>
+      <span class="badge-mode">OWNER CMS</span>
+    </h1>
+    <div class="nav-buttons">
+      <a href="/" target="_blank" class="btn btn-outline btn-sm" style="color: white; border-color: rgba(255,255,255,0.4);">🌐 View Public Website</a>
+      <button class="btn btn-outline btn-sm" style="color: white; border-color: rgba(255,255,255,0.4);" onclick="exportMenuJSON()">💾 Export Backup</button>
+      <button class="btn btn-danger btn-sm" onclick="logoutAdmin()">🔒 Lock &amp; Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+
     <!-- Admin Tabs -->
     <div class="admin-tabs">
-      <button class="tab-btn active" onclick="switchTab(0)">🍽️ Menu & Photos</button>
-      <button class="tab-btn" onclick="switchTab(1)">📢 Banners & Branding</button>
-      <button class="tab-btn" onclick="switchTab(2)">🕒 Status & Hours</button>
-      <button class="tab-btn" onclick="switchTab(3)">📦 Orders & Kitchen</button>
-      <button class="tab-btn" onclick="switchTab(4)">📋 Audit Log</button>
-      <button class="tab-btn" onclick="switchTab(5)">💾 Backup & Sync</button>
+      <button class="tab-btn active" onclick="switchTab(0)">📊 Dashboard</button>
+      <button class="tab-btn" onclick="switchTab(1)">🍽️ Menu &amp; Dishes</button>
+      <button class="tab-btn" onclick="switchTab(2)">🏷️ Categories</button>
+      <button class="tab-btn" onclick="switchTab(3)">📦 Kitchen Orders</button>
+      <button class="tab-btn" onclick="switchTab(4)">📅 Reservations</button>
+      <button class="tab-btn" onclick="switchTab(5)">🎨 Banners &amp; Theme</button>
+      <button class="tab-btn" onclick="switchTab(6)">🕒 Hours &amp; Info</button>
+      <button class="tab-btn" onclick="switchTab(7)">💾 Backup &amp; Restore</button>
+      <button class="tab-btn" onclick="switchTab(8)">🔐 Security &amp; Database</button>
     </div>
 
-    <!-- TAB 0: MENU & PHOTOS -->
-    <div id="tab0" class="tab-content">
+    <!-- TAB 0: DASHBOARD -->
+    <div class="tab-content" id="tab0" style="display: block;">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total Dishes</div>
+          <div class="metric-val" id="statTotalDishes">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Morning Menu Items</div>
+          <div class="metric-val" id="statMorningDishes">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Sold Out Items</div>
+          <div class="metric-val" id="statSoldOut">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Active Orders</div>
+          <div class="metric-val" id="statActiveOrders">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Table Reservations</div>
+          <div class="metric-val" id="statReservations">0</div>
+        </div>
+      </div>
+
       <div class="card">
-        <div class="card-title">
-          <div>
-            <span>Menu Catalog & Photo Management</span>
-            <p style="font-size: 12px; font-weight: normal; color: #666; margin-top: 2px;">Changes take effect immediately on public site without rebuilding</p>
-          </div>
+        <div class="card-header">
+          <h3 class="card-title">Live Store Status Override</h3>
+          <span style="font-size: 13px; color: #666;">Affects website status banner &amp; pickup notice</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-outline" id="btnStatusAuto" onclick="setStoreStatus('AUTO')">⏰ Automatic (7:30 AM - 6:00 PM NYC)</button>
+          <button class="btn btn-outline" id="btnStatusOpen" onclick="setStoreStatus('OPEN')">🟢 Force OPEN</button>
+          <button class="btn btn-outline" id="btnStatusClosed" onclick="setStoreStatus('CLOSED')">🔴 Force CLOSED</button>
+          <button class="btn btn-outline" id="btnStatusTemp" onclick="setStoreStatus('TEMPORARILY_CLOSED')">🟠 Temporarily Closed</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Owner Quick Actions</h3>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button class="btn btn-primary" onclick="openAddDishModal()">+ Add New Dish</button>
+          <button class="btn btn-outline" onclick="switchTab(3)">View Kitchen Orders</button>
+          <button class="btn btn-outline" onclick="switchTab(4)">View Table Reservations</button>
+          <button class="btn btn-outline" onclick="exportMenuJSON()">Download Menu JSON</button>
+          <a href="/" target="_blank" class="btn btn-outline">Preview Live Homepage</a>
         </div>
+      </div>
+    </div>
 
-        <div style="margin-bottom: 16px;">
-          <input type="text" id="adminSearchInput" class="form-control" placeholder="Search dishes by name or category..." oninput="filterDishList()">
+    <!-- TAB 1: MENU & DISHES -->
+    <div class="tab-content" id="tab1" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Menu &amp; Dishes Manager</h3>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="text" id="adminSearchInput" class="form-control" style="width: 200px; padding: 7px 12px;" placeholder="Search dishes..." oninput="filterDishList()">
+            <select id="adminCategoryFilter" class="form-control" style="width: 160px; padding: 7px 12px;" onchange="filterDishList()">
+              <option value="ALL">All Categories</option>
+              <option value="Morning">Morning Menu</option>
+              <option value="Sandwich">Sandwiches &amp; Savoury</option>
+              <option value="Bakery">Bakery &amp; Pastries</option>
+              <option value="Coffee">Specialty Coffee</option>
+              <option value="Beverages">Cold Beverages</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="openAddDishModal()">+ Add Dish</button>
+          </div>
         </div>
-
         <div id="dishList">
+          <!-- Populated dynamically via safe DOM methods -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CATEGORIES -->
+    <div class="tab-content" id="tab2" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Menu Categories Manager</h3>
+          <button class="btn btn-primary btn-sm" onclick="addNewCategoryPrompt()">+ Add Category</button>
+        </div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
+          Manage the navigation categories displayed on the public menu.
+        </p>
+        <div id="categoryManagerList" style="display: flex; flex-direction: column; gap: 10px;">
           <!-- Populated dynamically -->
         </div>
       </div>
     </div>
 
-    <!-- TAB 1: BANNERS & BRANDING -->
-    <div id="tab1" class="tab-content" style="display: none;">
+    <!-- TAB 3: KITCHEN ORDERS -->
+    <div class="tab-content" id="tab3" style="display: none;">
       <div class="card">
-        <div class="card-title">Website Banners & Visual Content</div>
-        <form onsubmit="saveBanners(event)">
-          <div class="form-group">
-            <label>Main Headline</label>
-            <input type="text" id="headlineInput" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Subheadline / Description</label>
-            <textarea id="subheadlineInput" class="form-control" rows="2"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Morning Menu Schedule Window</label>
-            <input type="text" id="morningInput" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Top Announcement Bar Text</label>
-            <input type="text" id="announcementInput" class="form-control" placeholder="e.g. Free delivery on orders over $35">
-          </div>
-          <div class="form-group">
-            <label>Website Logo Photo</label>
-            <input type="file" accept="image/*" class="form-control" onchange="uploadLogoFile(this)">
-          </div>
-          <div class="form-group">
-            <label>Hero Banner Photograph</label>
-            <input type="file" accept="image/*" class="form-control" onchange="uploadHeroFile(this)">
-          </div>
-          <button type="submit" class="btn btn-primary">Publish Banners & Styling</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- TAB 2: STATUS & HOURS -->
-    <div id="tab2" class="tab-content" style="display: none;">
-      <div class="card">
-        <div class="card-title">Live Store Status</div>
-        <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Controls whether online orders are currently accepted on the website and app.</p>
-        <div class="btn-group">
-          <button id="btnOpen" class="status-btn active-open" onclick="setStatus('OPEN')">🟢 Open Now</button>
-          <button id="btnClosed" class="status-btn" onclick="setStatus('CLOSED')">🔴 Closed</button>
-          <button id="btnTemp" class="status-btn" onclick="setStatus('TEMPORARILY_CLOSED')">🟠 Temporarily Closed</button>
+        <div class="card-header">
+          <h3 class="card-title">Live Kitchen Orders Pipeline</h3>
+          <button class="btn btn-outline btn-sm" onclick="renderOrders()">🔄 Refresh Orders</button>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Business Location & Hours</div>
-        <form onsubmit="saveStoreDetails(event)">
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" id="storeAddressInput" class="form-control" value="90 Chambers St Unit B, New York, NY 10007">
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="text" id="storePhoneInput" class="form-control" value="+1 212-372-0297">
-          </div>
-          <div class="form-group">
-            <label>Store Hours</label>
-            <input type="text" id="storeHoursInput" class="form-control" value="Mon–Fri 7:30 AM – 6:00 PM · Sat–Sun 8:00 AM – 5:00 PM">
-          </div>
-          <button type="submit" class="btn btn-primary">Save Business Details</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- TAB 3: ORDERS & KITCHEN -->
-    <div id="tab3" class="tab-content" style="display: none;">
-      <div class="card">
-        <div class="card-title">
-          <span>Live Kitchen Display & Order Manager</span>
-          <button class="btn btn-outline btn-sm" onclick="seedSampleOrder()">+ Simulate Incoming Order</button>
-        </div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">
+          Incoming customer orders submitted via online counter pickup.
+        </p>
         <div id="ordersList">
-          <!-- Populated -->
+          <!-- Populated dynamically -->
         </div>
       </div>
     </div>
 
-    <!-- TAB 4: AUDIT LOG -->
-    <div id="tab4" class="tab-content" style="display: none;">
+    <!-- TAB 4: RESERVATIONS -->
+    <div class="tab-content" id="tab4" style="display: none;">
       <div class="card">
-        <div class="card-title">System & Change Audit Log</div>
-        <p style="font-size: 13px; color: #666; margin-bottom: 14px;">Chronological history of all admin modifications, price updates, and photo uploads.</p>
-        <div id="auditList">
-          <!-- Populated -->
+        <div class="card-header">
+          <h3 class="card-title">Table Reservations Manager</h3>
+          <button class="btn btn-outline btn-sm" onclick="renderReservations()">🔄 Refresh Bookings</button>
+        </div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">
+          Customer table requests submitted through the website reservation form.
+        </p>
+        <div id="reservationsList">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </div>
 
-    <!-- TAB 5: BACKUP & SYNC -->
-    <div id="tab5" class="tab-content" style="display: none;">
+    <!-- TAB 5: BANNERS & THEME -->
+    <div class="tab-content" id="tab5" style="display: none;">
       <div class="card">
-        <div class="card-title">Data Backup, Vercel & JSON Sync</div>
-        <p style="font-size: 13px; color: #666; margin-bottom: 16px;">Export your customized menu and settings to JSON for backup, or restore to factory defaults.</p>
+        <div class="card-header">
+          <h3 class="card-title">Homepage Copy &amp; Announcement Banners</h3>
+        </div>
+        <form onsubmit="saveBrandingSettings(event)">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label>Special Announcement Banner</label>
+              <select id="settingAnnouncementActive" class="form-control">
+                <option value="false">Disabled / Hidden</option>
+                <option value="true">Active (Show at Top)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label>Announcement Text</label>
+              <input type="text" id="settingAnnouncementText" class="form-control" placeholder="Special morning pastry tasting this week!">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Hero Headline</label>
+            <input type="text" id="settingHeroHeadline" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label>Hero Subheadline</label>
+            <textarea id="settingHeroSubheadline" class="form-control" rows="2" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Morning Menu Schedule Badge</label>
+            <input type="text" id="settingMorningSchedule" class="form-control">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Banners &amp; Copy</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 6: HOURS & INFO -->
+    <div class="tab-content" id="tab6" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Tribeca Location, Contact &amp; Operating Hours</h3>
+        </div>
+        <form onsubmit="saveContactSettings(event)">
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label>Store Address</label>
+              <input type="text" id="settingAddress" class="form-control" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label>Direct Phone Number</label>
+              <input type="text" id="settingPhone" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Operating Hours Breakdown</label>
+            <textarea id="settingHours" class="form-control" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Contact Information</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 7: BACKUP & RESTORE -->
+    <div class="tab-content" id="tab7" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Data Backup, Export &amp; Factory Reset</h3>
+        </div>
+        <p style="font-size: 14px; color: #555; margin-bottom: 20px;">
+          Export your verified menu and site configurations as a JSON file.
+        </p>
         
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="btn btn-primary" onclick="exportMenuJSON()">📥 Download Menu JSON</button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;">
+          <button class="btn btn-primary" onclick="exportMenuJSON()">📥 Download Clean Backup (.json)</button>
           <label class="btn btn-outline" style="cursor: pointer;">
-            📤 Import Menu JSON
+            📤 Import Backup (.json)
             <input type="file" accept=".json" style="display: none;" onchange="importMenuJSON(this)">
           </label>
-          <button class="btn btn-danger" onclick="confirmResetDefaults()">⚠️ Reset to Factory Defaults</button>
+        </div>
+
+        <div style="border-top: 1px solid #EEE; padding-top: 20px;">
+          <h4 style="color: var(--red); margin-bottom: 8px;">Factory Defaults</h4>
+          <p style="font-size: 13px; color: #666; margin-bottom: 12px;">Restore initial Tribeca artisan seed data.</p>
+          <button class="btn btn-danger btn-sm" onclick="confirmResetDefaults()">Restore Factory Seed Menu</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Edit Dish Modal -->
+    <!-- TAB 8: SECURITY & CLOUD DATABASE -->
+    <div class="tab-content" id="tab8" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Cloud Database &amp; PostgreSQL Sync (Supabase)</h3>
+          <span id="tab8CloudBadge" class="order-status-pill status-RECEIVED">Checking...</span>
+        </div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 18px;">
+          Synchronize your menu, prices, customer orders, and table bookings across all phones, tablets, and laptops using Supabase with Row Level Security (RLS).
+        </p>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+          <button class="btn btn-primary" onclick="openCloudConfigModal()">⚙️ Manage Cloud API Keys</button>
+          <button class="btn btn-outline" onclick="syncLocalToCloud()">☁️ Upload Local Menu &amp; Settings to Cloud</button>
+          <button class="btn btn-outline" onclick="testCloudConnection()">🔄 Test Connection</button>
+        </div>
+
+        <div id="cloudDiagnosticBox" style="background: #F8F9FA; border: 1px solid #E0E0E0; border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.6;">
+          <strong>Active Backend Engine:</strong> <span id="diagEngine">Loading...</span><br>
+          <strong>PostgreSQL Realtime Channel:</strong> <span id="diagRealtime">Disabled (Connect Supabase)</span><br>
+          <strong>Row Level Security (RLS):</strong> Enforced on Supabase server boundary.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Security &amp; Administrative Audit Log</h3>
+          <button class="btn btn-outline btn-sm" onclick="clearAuditLog()">Clear Log</button>
+        </div>
+        <div id="auditList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Edit / Add Dish Modal -->
   <div id="adminDishModal" class="modal-backdrop">
-    <div class="modal-box">
-      <h3 id="adminModalTitle" style="margin-bottom: 16px; color: var(--espresso);">Edit Dish</h3>
+    <div class="modal-content">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 id="adminModalTitle" style="font-size: 18px; color: var(--espresso);">Edit Dish</h3>
+        <button onclick="closeAdminDishModal()" style="background: none; border: none; font-size: 22px; cursor: pointer;">&times;</button>
+      </div>
       <form id="adminDishForm" onsubmit="saveAdminDish(event)">
         <input type="hidden" id="modalDishId">
 
@@ -433,8 +681,8 @@
             <label>Category</label>
             <select id="modalDishCat" class="form-control">
               <option value="Morning">Morning Menu</option>
-              <option value="Sandwich">Sandwiches & Savoury</option>
-              <option value="Bakery">Bakery & Pastries</option>
+              <option value="Sandwich">Sandwiches &amp; Savoury</option>
+              <option value="Bakery">Bakery &amp; Pastries</option>
               <option value="Coffee">Specialty Coffee</option>
               <option value="Beverages">Cold Beverages</option>
             </select>
@@ -449,7 +697,7 @@
         <div class="form-row">
           <div class="form-group" style="flex: 1;">
             <label>Badge</label>
-            <input type="text" id="modalDishBadge" class="form-control" placeholder="e.g. VEGAN">
+            <input type="text" id="modalDishBadge" class="form-control" placeholder="VEGAN, POPULAR, etc.">
           </div>
           <div class="form-group" style="flex: 1;">
             <label>Stock Status</label>
@@ -461,13 +709,13 @@
         </div>
 
         <div class="form-group">
-          <label>Dish Photograph</label>
-          <input type="file" id="modalDishFileInput" accept="image/*" class="form-control" onchange="previewAdminModalPhoto(this)">
-          <input type="text" id="modalDishImgUrl" class="form-control" placeholder="Or enter Image URL" style="margin-top: 6px;" oninput="document.getElementById('adminPhotoPreview').style.backgroundImage = `url('${this.value}')`">
-          <div id="adminPhotoPreview" style="height: 120px; border-radius: 8px; background-size: cover; background-position: center; background-color: #eee; margin-top: 8px; border: 1px solid #ddd;"></div>
+          <label>Photograph</label>
+          <input type="file" accept="image/*" class="form-control" onchange="previewAdminModalPhoto(this)">
+          <input type="text" id="modalDishImgUrl" class="form-control" placeholder="Or paste image URL" style="margin-top: 6px;">
+          <div id="adminPhotoPreview" style="width: 100%; height: 130px; background-size: cover; background-position: center; border-radius: 6px; margin-top: 8px; border: 1px solid #DDD;"></div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px;">
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
           <button type="button" class="btn btn-outline" onclick="closeAdminDishModal()">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Dish</button>
         </div>
@@ -475,7 +723,7 @@
     </div>
   </div>
 
-  <div id="toast" class="toast">Changes saved!</div>
+  <div id="toast" class="toast">Action completed!</div>
 
   <script>
     const defaultMenu = [
@@ -485,69 +733,192 @@
       { id: "p_1", name: "Peruvian Alfajores", price: 4.95, desc: "Handmade cornstarch shortbread cookies sandwiched with rich dulce de leche.", cat: "Bakery", badge: "HOMEMADE", inStock: true, img: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop" },
       { id: "c_4", name: "Cortado", price: 4.00, desc: "Equal parts rich espresso and silky warm milk in a black ceramic glass.", cat: "Coffee", badge: "SPECIALTY", inStock: true, img: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop" },
       { id: "p_2", name: "Almond Croissant", price: 5.50, desc: "Flaky twice-baked croissant filled with rich almond frangipane cream.", cat: "Bakery", badge: "FRESH DAILY", inStock: true, img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop" },
-      { id: "sw_5", name: "Burrata Caprese", price: 14.95, desc: "Creamy fresh burrata with heirloom tomatoes, basil pesto, and aged balsamic reduction.", cat: "Sandwich", badge: "VEGETARIAN", inStock: true, img: "https://images.unsplash.com/photo-1592417817098-8f3d69109853?w=600&auto=format&fit=crop" }
+      { id: "sw_5", name: "Burrata Caprese", price: 14.95, desc: "Creamy fresh burrata with heirloom tomatoes, basil pesto, and aged balsamic reduction.", cat: "Sandwich", badge: "VEGETARIAN", inStock: true, img: "https://images.unsplash.com/photo-1592417817098-8f3d69109853?w=600&auto=format&fit=crop" },
+      { id: "c_1", name: "Iced Caramel Macchiato", price: 5.75, desc: "Chilled espresso poured over creamy oat milk with vanilla syrup and house caramel drizzle.", cat: "Beverages", badge: "COLD BREW", inStock: true, img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&auto=format&fit=crop" }
     ];
 
-    let currentMenu = JSON.parse(localStorage.getItem("artesano_menu") || JSON.stringify(defaultMenu));
-    let currentSettings = JSON.parse(localStorage.getItem("artesano_settings") || JSON.stringify({
-      status: "OPEN",
-      headline: "Fresh · Bright · Plant-Filled · Homemade · Daily",
-      subheadline: "Artisan neighbourhood café + bakery with Italian influence in Tribeca, New York City.",
-      morningWindow: "Morning Menu Served Daily 8:00 AM – 11:00 AM",
-      phone: "+1 212-372-0297",
-      address: "90 Chambers St Unit B, New York, NY 10007",
-      hours: "Mon–Fri 7:30 AM – 6:00 PM · Sat–Sun 8:00 AM – 5:00 PM"
-    }));
-    let auditLogs = JSON.parse(localStorage.getItem("artesano_audit") || JSON.stringify([
-      { text: "Admin portal session started", time: new Date().toLocaleTimeString() }
-    ]));
-    let orders = JSON.parse(localStorage.getItem("artesano_orders") || JSON.stringify([
-      { id: "ORD-101", customer: "Sarah Jenkins", items: "1x Avocado Toast, 1x Cortado", total: 13.95, status: "PREPARING", time: "10:14 AM" }
-    ]));
+    let currentMenu = [];
+    let currentSettings = {};
+    let auditLogs = [];
+    let orders = [];
+    let reservations = [];
+    let categories = ["Morning", "Sandwich", "Bakery", "Coffee", "Beverages"];
+    let realtimeChannel = null;
 
-    function checkLogin() {
-      const pin = document.getElementById("pinInput").value;
-      if (pin === "1234" || pin === "") {
-        document.getElementById("loginOverlay").style.display = "none";
-        sessionStorage.setItem("admin_auth", "true");
-        initAdmin();
+    // Supabase Cloud & Session Validation
+    async function checkSession() {
+      updateCloudStatusBadges();
+
+      if (window.ArtesanoBackend && window.ArtesanoBackend.isCloudActive) {
+        const { data } = await window.ArtesanoBackend.getSession();
+        if (data && data.session) {
+          document.getElementById("loginOverlay").style.display = "none";
+          await initAdmin();
+          return;
+        }
       } else {
-        alert("Invalid PIN. Use 1234 for manager access.");
+        const token = sessionStorage.getItem("admin_auth_token");
+        const authTime = parseInt(sessionStorage.getItem("admin_auth_time") || "0", 10);
+        if (token && (Date.now() - authTime < 2 * 60 * 60 * 1000)) {
+          document.getElementById("loginOverlay").style.display = "none";
+          await initAdmin();
+          return;
+        }
+      }
+
+      document.getElementById("loginOverlay").style.display = "flex";
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById("adminEmailInput").value.trim();
+      const password = document.getElementById("adminPasswordInput").value;
+      const btn = document.getElementById("btnLoginSubmit");
+      const errEl = document.getElementById("loginErrorMsg");
+
+      btn.disabled = true;
+      btn.textContent = "Authenticating...";
+      errEl.style.display = "none";
+
+      try {
+        if (window.ArtesanoBackend && window.ArtesanoBackend.isCloudActive) {
+          const { data, error } = await window.ArtesanoBackend.signIn(email, password);
+          if (error) {
+            errEl.textContent = error.message || "Invalid credentials.";
+            errEl.style.display = "block";
+            addAudit(`Failed login attempt for ${email}`);
+          } else {
+            sessionStorage.setItem("admin_auth_token", "sb_" + Date.now());
+            sessionStorage.setItem("admin_auth_time", Date.now().toString());
+            document.getElementById("loginOverlay").style.display = "none";
+            addAudit(`Owner authenticated via Supabase Auth (${email})`);
+            await initAdmin();
+          }
+        } else {
+          // Local preview fallback mode
+          sessionStorage.setItem("admin_auth_token", "local_" + Date.now());
+          sessionStorage.setItem("admin_auth_time", Date.now().toString());
+          document.getElementById("loginOverlay").style.display = "none";
+          addAudit("Admin unlocked in Local Preview Mode");
+          await initAdmin();
+        }
+      } catch (err) {
+        errEl.textContent = "Authentication error: " + err.message;
+        errEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Sign In to Owner CMS";
       }
     }
 
-    function lockAdmin() {
-      sessionStorage.removeItem("admin_auth");
+    async function logoutAdmin() {
+      if (window.ArtesanoBackend) {
+        await window.ArtesanoBackend.signOut();
+      }
+      sessionStorage.removeItem("admin_auth_token");
+      sessionStorage.removeItem("admin_auth_time");
+      addAudit("Administrator logged out");
       location.reload();
     }
 
-    if (sessionStorage.getItem("admin_auth") === "true") {
-      document.getElementById("loginOverlay").style.display = "none";
-      initAdmin();
+    function openCloudConfigModal() {
+      const urlInput = document.getElementById("cfgSupabaseUrl");
+      const keyInput = document.getElementById("cfgSupabaseAnonKey");
+      if (urlInput) urlInput.value = localStorage.getItem("artesano_supabase_url") || "";
+      if (keyInput) keyInput.value = localStorage.getItem("artesano_supabase_anon_key") || "";
+      document.getElementById("cloudConfigModal").style.display = "flex";
     }
 
-    function initAdmin() {
-      renderDishes();
-      renderSettings();
-      renderAudit();
-      renderOrders();
+    function closeCloudConfigModal() {
+      document.getElementById("cloudConfigModal").style.display = "none";
     }
 
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.style.display = "block";
-      setTimeout(() => t.style.display = "none", 3000);
+    function saveCloudConfig(e) {
+      e.preventDefault();
+      const url = document.getElementById("cfgSupabaseUrl").value.trim();
+      const key = document.getElementById("cfgSupabaseAnonKey").value.trim();
+
+      if (!url.startsWith("https://")) {
+        alert("Please enter a valid Supabase HTTPS URL.");
+        return;
+      }
+      if (key.length < 20) {
+        alert("Please enter a valid Supabase anon/public API key.");
+        return;
+      }
+
+      localStorage.setItem("artesano_supabase_url", url);
+      localStorage.setItem("artesano_supabase_anon_key", key);
+
+      window.ArtesanoBackend.init();
+      closeCloudConfigModal();
+      updateCloudStatusBadges();
+      showToast("Cloud credentials saved! Reconnecting...");
+      setTimeout(() => location.reload(), 800);
     }
 
-    function addAudit(action) {
-      const entry = { text: action, time: new Date().toLocaleTimeString() };
-      auditLogs.unshift(entry);
-      if (auditLogs.length > 50) auditLogs.pop();
-      localStorage.setItem("artesano_audit", JSON.stringify(auditLogs));
-      renderAudit();
+    function updateCloudStatusBadges() {
+      const isCloud = window.ArtesanoBackend && window.ArtesanoBackend.isCloudActive;
+      const statusText = isCloud ? "Connected to Supabase PostgreSQL 🟢" : "Local Storage Mode (Cloud unconfigured) 🟠";
+      
+      const authNotice = document.getElementById("authCloudStatusText");
+      if (authNotice) authNotice.textContent = statusText;
+
+      const tab8Badge = document.getElementById("tab8CloudBadge");
+      if (tab8Badge) {
+        tab8Badge.textContent = isCloud ? "CONNECTED 🟢" : "LOCAL CACHE ONLY 🟠";
+        tab8Badge.className = "order-status-pill " + (isCloud ? "status-READY" : "status-PREPARING");
+      }
+
+      const diagEngine = document.getElementById("diagEngine");
+      if (diagEngine) {
+        diagEngine.textContent = isCloud ? "Supabase PostgreSQL Database (Realtime enabled)" : "Browser LocalStorage (Single device)";
+      }
+
+      const diagRealtime = document.getElementById("diagRealtime");
+      if (diagRealtime) {
+        diagRealtime.textContent = isCloud ? "Active (Listening for kitchen orders & table bookings)" : "Disabled (Connect Supabase to activate)";
+      }
     }
 
+    async function testCloudConnection() {
+      if (!window.ArtesanoBackend || !window.ArtesanoBackend.isCloudActive) {
+        alert("Supabase Cloud is not configured. Click 'Manage Cloud API Keys' to add your URL and Anon Key.");
+        return;
+      }
+      try {
+        const { data, error } = await window.ArtesanoBackend.client.from('menu_items').select('id').limit(1);
+        if (error) throw error;
+        alert("✅ Success! Connected to Supabase PostgreSQL cloud database.");
+      } catch (e) {
+        alert("❌ Connection failed: " + (e.message || "Ensure tables and schema.sql have been run."));
+      }
+    }
+
+    async function syncLocalToCloud() {
+      if (!window.ArtesanoBackend || !window.ArtesanoBackend.isCloudActive) {
+        alert("Please connect Supabase first.");
+        return;
+      }
+      if (!confirm("Upload current local menu and store settings to your Supabase PostgreSQL cloud database?")) {
+        return;
+      }
+
+      try {
+        const menu = await window.ArtesanoBackend.getMenu();
+        for (const item of menu) {
+          await window.ArtesanoBackend.saveMenuItem(item);
+        }
+        await window.ArtesanoBackend.saveSettings(currentSettings);
+        addAudit(`Synchronized ${menu.length} menu items and store settings to Supabase cloud`);
+        alert("✅ Successfully synchronized menu and settings to Supabase cloud!");
+        await initAdmin();
+      } catch (e) {
+        alert("Sync error: " + e.message);
+      }
+    }
+
+    // Tab Switching
     function switchTab(index) {
       const tabs = document.querySelectorAll(".tab-btn");
       const contents = document.querySelectorAll(".tab-content");
@@ -555,60 +926,201 @@
       contents.forEach((c, i) => c.style.display = i === index ? "block" : "none");
     }
 
-    function renderDishes(filter = "") {
-      const container = document.getElementById("dishList");
-      container.innerHTML = "";
-      const filtered = currentMenu.filter(d => 
-        d.name.toLowerCase().includes(filter.toLowerCase()) || 
-        (d.cat && d.cat.toLowerCase().includes(filter.toLowerCase()))
-      );
+    async function initAdmin() {
+      if (window.ArtesanoBackend) {
+        currentMenu = await window.ArtesanoBackend.getMenu();
+        currentSettings = await window.ArtesanoBackend.getSettings();
+        orders = await window.ArtesanoBackend.getOrders();
+        reservations = await window.ArtesanoBackend.getReservations();
+      }
 
-      filtered.forEach((dish, index) => {
+      renderDishes();
+      renderDashboard();
+      renderOrders();
+      renderReservations();
+      renderCategories();
+      renderBrandingInputs();
+      renderAuditLogs();
+      updateCloudStatusBadges();
+
+      // Realtime listener
+      if (window.ArtesanoBackend && window.ArtesanoBackend.isCloudActive && !realtimeChannel) {
+        realtimeChannel = window.ArtesanoBackend.subscribeRealtime(
+          async () => {
+            orders = await window.ArtesanoBackend.getOrders();
+            renderOrders();
+            showToast("🔔 New customer order received!");
+          },
+          async () => {
+            reservations = await window.ArtesanoBackend.getReservations();
+            renderReservations();
+            showToast("🔔 New table reservation recorded!");
+          },
+          async () => {
+            currentMenu = await window.ArtesanoBackend.getMenu();
+            renderDishes();
+          }
+        );
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      if (!t) return;
+      t.textContent = msg;
+      t.style.display = "block";
+      setTimeout(() => t.style.display = "none", 3000);
+    }
+
+    function addAudit(action) {
+      const entry = {
+        text: action,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      };
+      auditLogs.unshift(entry);
+      if (auditLogs.length > 50) auditLogs.pop();
+      try {
+        localStorage.setItem("artesano_audit", JSON.stringify(auditLogs));
+      } catch (e) {}
+      renderAuditLogs();
+    }
+
+    function renderAuditLogs() {
+      const container = document.getElementById("auditList");
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (auditLogs.length === 0) {
+        container.innerHTML = "<p style='color: #888; font-size: 13px; padding: 12px;'>No audit entries recorded.</p>";
+        return;
+      }
+
+      auditLogs.slice(0, 30).forEach(log => {
+        const d = document.createElement("div");
+        d.style.cssText = "padding: 8px 12px; border-bottom: 1px solid #EEE; font-size: 12px; display: flex; justify-content: space-between;";
+        const timeSpan = document.createElement("span");
+        timeSpan.style.color = "#888";
+        timeSpan.textContent = log.time || "";
+        const textSpan = document.createElement("span");
+        textSpan.style.fontWeight = "600";
+        textSpan.textContent = log.text || "";
+        d.appendChild(timeSpan);
+        d.appendChild(textSpan);
+        container.appendChild(d);
+      });
+    }
+
+    function clearAuditLog() {
+      if (confirm("Clear admin security logs?")) {
+        auditLogs = [{ text: "Audit log reset by administrator", time: new Date().toLocaleTimeString() }];
+        try {
+          localStorage.setItem("artesano_audit", JSON.stringify(auditLogs));
+        } catch (e) {}
+        renderAuditLogs();
+        showToast("Audit log cleared.");
+      }
+    }
+
+    // Dashboard Statistics
+    function renderDashboard() {
+      document.getElementById("statTotalDishes").textContent = currentMenu.length;
+      document.getElementById("statMorningDishes").textContent = currentMenu.filter(d => d.cat === "Morning").length;
+      document.getElementById("statSoldOut").textContent = currentMenu.filter(d => d.inStock === false).length;
+      document.getElementById("statActiveOrders").textContent = orders.filter(o => o.status !== "COMPLETED" && !o.status.includes("REFUNDED")).length;
+      document.getElementById("statReservations").textContent = reservations.length;
+
+      // Status buttons highlight
+      const st = currentSettings.status || "AUTO";
+      document.getElementById("btnStatusAuto")?.classList.toggle("btn-primary", st === "AUTO");
+      document.getElementById("btnStatusOpen")?.classList.toggle("btn-primary", st === "OPEN");
+      document.getElementById("btnStatusClosed")?.classList.toggle("btn-primary", st === "CLOSED");
+      document.getElementById("btnStatusTemp")?.classList.toggle("btn-primary", st === "TEMPORARILY_CLOSED");
+    }
+
+    async function setStoreStatus(st) {
+      currentSettings.status = st;
+      if (window.ArtesanoBackend) {
+        await window.ArtesanoBackend.saveSettings(currentSettings);
+      }
+      renderDashboard();
+      addAudit(`Store operational status set to: ${st}`);
+      showToast(`Store status updated: ${st}`);
+    }
+
+    // Anti-XSS Protected Dishes Manager
+    function renderDishes(filterText = "") {
+      const container = document.getElementById("dishList");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const catFilter = document.getElementById("adminCategoryFilter")?.value || "ALL";
+      const q = filterText.toLowerCase().trim();
+
+      const filtered = currentMenu.filter(d => {
+        const matchCat = catFilter === "ALL" || d.cat === catFilter;
+        const matchQ = !q || d.name.toLowerCase().includes(q) || (d.desc && d.desc.toLowerCase().includes(q));
+        return matchCat && matchQ;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p style="padding: 20px; color: #888; text-align: center;">No menu items matched your filter.</p>`;
+        return;
+      }
+
+      filtered.forEach((dish) => {
         const row = document.createElement("div");
         row.className = "dish-row";
         const isOut = dish.inStock === false;
+        const safeImg = window.ArtesanoSecurity ? window.ArtesanoSecurity.sanitizeUrl(dish.img) : dish.img;
+        const safeName = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.name) : dish.name;
+        const safeDesc = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.desc || '') : (dish.desc || '');
+        const safeBadge = dish.badge ? (window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.badge) : dish.badge) : '';
+        const safeCat = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.cat || 'General') : (dish.cat || 'General');
+        const safeId = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.id) : dish.id;
+        const priceNum = parseFloat(dish.price) || 0;
 
         row.innerHTML = `
-          <div class="dish-img-thumb" style="background-image: url('${dish.img || ''}')"></div>
+          <div class="dish-img-thumb" style="background-image: url('${safeImg}')"></div>
           <div class="dish-info">
             <h4>
-              ${dish.name}
-              ${dish.badge ? `<span class="dish-cat-badge" style="background: var(--caramel); color: white;">${dish.badge}</span>` : ''}
+              ${safeName}
+              ${safeBadge ? `<span class="dish-cat-badge" style="background: var(--caramel); color: white;">${safeBadge}</span>` : ''}
               ${isOut ? `<span class="dish-cat-badge" style="background: var(--red); color: white;">SOLD OUT</span>` : ''}
             </h4>
-            <p>${dish.desc || ''}</p>
+            <p>${safeDesc}</p>
             <div class="dish-meta">
-              <span class="dish-price">$${parseFloat(dish.price).toFixed(2)}</span>
-              <span class="dish-cat-badge">${dish.cat || 'General'}</span>
+              <span class="dish-price">$${priceNum.toFixed(2)}</span>
+              <span class="dish-cat-badge">${safeCat}</span>
             </div>
           </div>
           <div class="dish-actions">
-            <button class="btn btn-outline btn-sm" onclick="openEditModal('${dish.id}')">✏️ Edit</button>
+            <button class="btn btn-outline btn-sm" onclick="openEditModal('${safeId}')">✏️ Edit</button>
             <label class="btn btn-outline btn-sm" style="cursor: pointer;">
               📷 Photo
-              <input type="file" accept="image/*" style="display:none;" onchange="uploadRowPhoto('${dish.id}', this)">
+              <input type="file" accept="image/*" style="display:none;" onchange="uploadRowPhoto('${safeId}', this)">
             </label>
-            <button class="btn btn-outline btn-sm" onclick="toggleDishStock('${dish.id}')">
+            <button class="btn btn-outline btn-sm" onclick="toggleDishStock('${safeId}')">
               ${isOut ? 'Mark In Stock' : 'Mark Sold Out'}
             </button>
-            <button class="btn btn-outline btn-sm" onclick="moveDish('${dish.id}', -1)" title="Move Up">↑</button>
-            <button class="btn btn-outline btn-sm" onclick="moveDish('${dish.id}', 1)" title="Move Down">↓</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteDish('${dish.id}')">✕</button>
+            <button class="btn btn-outline btn-sm" onclick="moveDish('${safeId}', -1)" title="Move Up">↑</button>
+            <button class="btn btn-outline btn-sm" onclick="moveDish('${safeId}', 1)" title="Move Down">↓</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteDish('${safeId}')">✕</button>
           </div>
         `;
         container.appendChild(row);
       });
+      renderDashboard();
     }
 
     function filterDishList() {
-      const q = document.getElementById("adminSearchInput").value;
+      const q = document.getElementById("adminSearchInput")?.value || "";
       renderDishes(q);
     }
 
     function openEditModal(id) {
       const dish = currentMenu.find(d => d.id === id);
       if (!dish) return;
-      document.getElementById("adminModalTitle").textContent = "Edit Dish: " + dish.name;
+      document.getElementById("adminModalTitle").textContent = "Edit Dish: " + (window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(dish.name) : dish.name);
       document.getElementById("modalDishId").value = dish.id;
       document.getElementById("modalDishName").value = dish.name;
       document.getElementById("modalDishPrice").value = dish.price;
@@ -617,7 +1129,8 @@
       document.getElementById("modalDishBadge").value = dish.badge || "";
       document.getElementById("modalDishStock").value = dish.inStock !== false ? "true" : "false";
       document.getElementById("modalDishImgUrl").value = dish.img || "";
-      document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${dish.img || ''}')`;
+      const safeImg = window.ArtesanoSecurity ? window.ArtesanoSecurity.sanitizeUrl(dish.img) : dish.img;
+      document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${safeImg}')`;
       document.getElementById("adminDishModal").style.display = "flex";
     }
 
@@ -642,79 +1155,94 @@
 
     function previewAdminModalPhoto(input) {
       if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const validation = window.ArtesanoSecurity ? window.ArtesanoSecurity.validateImageFile(file) : { valid: true };
+        if (!validation.valid) {
+          alert(validation.error);
+          return;
+        }
         const reader = new FileReader();
         reader.onload = function(e) {
           document.getElementById("modalDishImgUrl").value = e.target.result;
           document.getElementById("adminPhotoPreview").style.backgroundImage = `url('${e.target.result}')`;
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
       }
     }
 
-    function saveAdminDish(e) {
+    async function saveAdminDish(e) {
       e.preventDefault();
       const id = document.getElementById("modalDishId").value;
-      const name = document.getElementById("modalDishName").value;
+      const name = document.getElementById("modalDishName").value.trim();
       const price = parseFloat(document.getElementById("modalDishPrice").value);
       const cat = document.getElementById("modalDishCat").value;
-      const desc = document.getElementById("modalDishDesc").value;
-      const badge = document.getElementById("modalDishBadge").value;
+      const desc = document.getElementById("modalDishDesc").value.trim();
+      const badge = document.getElementById("modalDishBadge").value.trim();
       const inStock = document.getElementById("modalDishStock").value === "true";
-      const img = document.getElementById("modalDishImgUrl").value;
+      const img = document.getElementById("modalDishImgUrl").value.trim();
 
-      if (id) {
-        const item = currentMenu.find(d => d.id === id);
-        if (item) {
-          item.name = name;
-          item.price = price;
-          item.cat = cat;
-          item.desc = desc;
-          item.badge = badge;
-          item.inStock = inStock;
-          if (img) item.img = img;
-          addAudit(`Updated dish "${name}" ($${price.toFixed(2)})`);
+      const dishObj = {
+        id: id || "custom_" + Date.now(),
+        name,
+        price,
+        cat,
+        desc,
+        badge,
+        inStock,
+        img: img || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop"
+      };
+
+      try {
+        if (window.ArtesanoBackend) {
+          await window.ArtesanoBackend.saveMenuItem(dishObj);
+          currentMenu = await window.ArtesanoBackend.getMenu();
         }
-      } else {
-        const newDish = {
-          id: "custom_" + Date.now(),
-          name, price, cat, desc, badge, inStock,
-          img: img || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&auto=format&fit=crop"
-        };
-        currentMenu.unshift(newDish);
-        addAudit(`Created new dish "${name}" ($${price.toFixed(2)})`);
+        renderDishes();
+        closeAdminDishModal();
+        addAudit(`Saved dish "${name}" ($${price.toFixed(2)})`);
+        showToast(window.ArtesanoBackend && window.ArtesanoBackend.isCloudActive ? "Dish saved to Supabase Cloud!" : "Dish saved to local browser cache.");
+      } catch (err) {
+        alert("Failed to save dish: " + err.message);
       }
-
-      localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
-      renderDishes();
-      closeAdminDishModal();
-      showToast("Dish saved successfully!");
     }
 
-    function uploadRowPhoto(id, input) {
+    async function uploadRowPhoto(id, input) {
       if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const validation = window.ArtesanoSecurity ? window.ArtesanoSecurity.validateImageFile(file) : { valid: true };
+        if (!validation.valid) {
+          alert(validation.error);
+          return;
+        }
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
           const item = currentMenu.find(d => d.id === id);
           if (item) {
             item.img = e.target.result;
-            localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+            if (window.ArtesanoBackend) {
+              await window.ArtesanoBackend.saveMenuItem(item);
+              currentMenu = await window.ArtesanoBackend.getMenu();
+            }
             renderDishes();
-            addAudit(`Changed photo for "${item.name}"`);
-            showToast(`Photograph updated for ${item.name}!`);
+            addAudit(`Updated photo for "${item.name}"`);
+            showToast(`Photo updated for ${item.name}!`);
           }
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
       }
     }
 
-    function toggleDishStock(id) {
+    async function toggleDishStock(id) {
       const item = currentMenu.find(d => d.id === id);
       if (item) {
         item.inStock = item.inStock === false ? true : false;
-        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        if (window.ArtesanoBackend) {
+          await window.ArtesanoBackend.saveMenuItem(item);
+          currentMenu = await window.ArtesanoBackend.getMenu();
+        }
         renderDishes();
         addAudit(`Toggled stock for "${item.name}" (${item.inStock ? 'In Stock' : 'Sold Out'})`);
-        showToast(`Stock updated for ${item.name}`);
+        showToast(`Stock status updated for ${item.name}`);
       }
     }
 
@@ -726,226 +1254,363 @@
         const temp = currentMenu[index];
         currentMenu[index] = currentMenu[target];
         currentMenu[target] = temp;
-        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        try {
+          localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        } catch (e) {}
         renderDishes();
-        addAudit(`Reordered "${temp.name}"`);
+        addAudit(`Reordered position of "${temp.name}"`);
       }
     }
 
-    function deleteDish(id) {
+    async function deleteDish(id) {
       const item = currentMenu.find(d => d.id === id);
-      if (confirm(`Are you sure you want to delete "${item?.name}"?`)) {
-        currentMenu = currentMenu.filter(d => d.id !== id);
-        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+      if (confirm(`Are you sure you want to permanently delete "${item?.name}"?`)) {
+        if (window.ArtesanoBackend) {
+          await window.ArtesanoBackend.deleteMenuItem(id);
+          currentMenu = await window.ArtesanoBackend.getMenu();
+        }
         renderDishes();
         addAudit(`Deleted dish "${item?.name}"`);
-        showToast("Dish deleted from menu.");
+        showToast("Dish removed from menu.");
       }
     }
 
-    // Status & Banners
-    function setStatus(st) {
-      currentSettings.status = st;
-      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
-      updateStatusButtons(st);
-      addAudit(`Changed store status to: ${st}`);
-      showToast(`Store status updated to ${st}`);
-    }
-
-    function updateStatusButtons(st) {
-      document.getElementById("btnOpen").className = "status-btn " + (st === "OPEN" ? "active-open" : "");
-      document.getElementById("btnClosed").className = "status-btn " + (st === "CLOSED" ? "active-closed" : "");
-      document.getElementById("btnTemp").className = "status-btn " + (st === "TEMPORARILY_CLOSED" ? "active-temp" : "");
-    }
-
-    function renderSettings() {
-      if (currentSettings.headline) document.getElementById("headlineInput").value = currentSettings.headline;
-      if (currentSettings.subheadline) document.getElementById("subheadlineInput").value = currentSettings.subheadline;
-      if (currentSettings.morningWindow) document.getElementById("morningInput").value = currentSettings.morningWindow;
-      if (currentSettings.announcement) document.getElementById("announcementInput").value = currentSettings.announcement;
-      if (currentSettings.address) document.getElementById("storeAddressInput").value = currentSettings.address;
-      if (currentSettings.phone) document.getElementById("storePhoneInput").value = currentSettings.phone;
-      if (currentSettings.hours) document.getElementById("storeHoursInput").value = currentSettings.hours;
-      updateStatusButtons(currentSettings.status || "OPEN");
-    }
-
-    function saveBanners(e) {
-      e.preventDefault();
-      currentSettings.headline = document.getElementById("headlineInput").value;
-      currentSettings.subheadline = document.getElementById("subheadlineInput").value;
-      currentSettings.morningWindow = document.getElementById("morningInput").value;
-      currentSettings.announcement = document.getElementById("announcementInput").value;
-      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
-      addAudit("Published updated banners & announcements");
-      showToast("Banners published successfully!");
-    }
-
-    function saveStoreDetails(e) {
-      e.preventDefault();
-      currentSettings.address = document.getElementById("storeAddressInput").value;
-      currentSettings.phone = document.getElementById("storePhoneInput").value;
-      currentSettings.hours = document.getElementById("storeHoursInput").value;
-      localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
-      addAudit("Updated store contact & hours");
-      showToast("Store details saved!");
-    }
-
-    function uploadLogoFile(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          currentSettings.logo = e.target.result;
-          localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
-          addAudit("Uploaded custom brand logo");
-          showToast("Logo updated!");
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
-    function uploadHeroFile(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          currentSettings.heroImg = e.target.result;
-          localStorage.setItem("artesano_settings", JSON.stringify(currentSettings));
-          addAudit("Uploaded custom hero banner photo");
-          showToast("Hero banner updated!");
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-
-    // Orders & Kitchen
-    function renderOrders() {
-      const container = document.getElementById("ordersList");
+    // Categories Manager
+    function renderCategories() {
+      const container = document.getElementById("categoryManagerList");
+      if (!container) return;
       container.innerHTML = "";
+
+      categories.forEach((cat) => {
+        const count = currentMenu.filter(d => d.cat === cat).length;
+        const row = document.createElement("div");
+        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #FFF; border: 1px solid #EEE; border-radius: 8px;";
+        const safeCat = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(cat) : cat;
+        row.innerHTML = `
+          <div>
+            <strong>${safeCat}</strong>
+            <span style="font-size: 12px; color: #777; margin-left: 8px;">(${count} items assigned)</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-outline btn-sm" onclick="renameCategoryPrompt('${safeCat}')">Rename</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCategory('${safeCat}')">Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addNewCategoryPrompt() {
+      const name = prompt("Enter new category name:");
+      if (name && name.trim()) {
+        const trimmed = name.trim();
+        if (!categories.includes(trimmed)) {
+          categories.push(trimmed);
+          try {
+            localStorage.setItem("artesano_categories", JSON.stringify(categories));
+          } catch (e) {}
+          renderCategories();
+          addAudit(`Added new menu category "${trimmed}"`);
+          showToast(`Category "${trimmed}" added!`);
+        }
+      }
+    }
+
+    function renameCategoryPrompt(oldName) {
+      const newName = prompt(`Rename category "${oldName}" to:`, oldName);
+      if (newName && newName.trim() && newName !== oldName) {
+        const trimmed = newName.trim();
+        const idx = categories.indexOf(oldName);
+        if (idx !== -1) categories[idx] = trimmed;
+        currentMenu.forEach(d => { if (d.cat === oldName) d.cat = trimmed; });
+        try {
+          localStorage.setItem("artesano_categories", JSON.stringify(categories));
+          localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        } catch (e) {}
+        renderCategories();
+        renderDishes();
+        addAudit(`Renamed category "${oldName}" to "${trimmed}"`);
+        showToast("Category renamed!");
+      }
+    }
+
+    function deleteCategory(cat) {
+      if (confirm(`Delete category "${cat}"? Items in this category will be preserved under General.`)) {
+        categories = categories.filter(c => c !== cat);
+        currentMenu.forEach(d => { if (d.cat === cat) d.cat = "General"; });
+        try {
+          localStorage.setItem("artesano_categories", JSON.stringify(categories));
+          localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
+        } catch (e) {}
+        renderCategories();
+        renderDishes();
+        addAudit(`Deleted category "${cat}"`);
+        showToast("Category removed.");
+      }
+    }
+
+    // Orders & Kitchen Pipeline (Anti-XSS & Cloud Synced)
+    async function renderOrders() {
+      const container = document.getElementById("ordersList");
+      if (!container) return;
+      if (window.ArtesanoBackend) {
+        orders = await window.ArtesanoBackend.getOrders();
+      }
+      container.innerHTML = "";
+
       if (orders.length === 0) {
-        container.innerHTML = "<p style='color: #888;'>No active orders.</p>";
+        container.innerHTML = "<p style='color: #888; padding: 20px; text-align: center;'>No orders recorded yet.</p>";
+        renderDashboard();
         return;
       }
+
       orders.forEach(ord => {
         const card = document.createElement("div");
         card.className = "order-card";
+        const safeId = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.id || "") : (ord.id || "");
+        const safeCustomer = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.customer || "Guest") : (ord.customer || "Guest");
+        const safeMode = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.mode || "Takeaway") : (ord.mode || "Takeaway");
+        const safeStatus = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.status || "RECEIVED") : (ord.status || "RECEIVED");
+        const safeItems = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.items || "") : (ord.items || "");
+        const safeTime = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(ord.time || "") : (ord.time || "");
+        const totalNum = parseFloat(ord.total) || 0;
+        const statusClass = safeStatus.split(" ")[0].replace(/[^a-zA-Z0-9_-]/g, "");
+
         card.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <strong>${ord.id} · ${ord.customer}</strong>
-            <span class="dish-cat-badge" style="background: var(--espresso); color: white;">${ord.status}</span>
+            <strong>${safeId} · ${safeCustomer} (${safeMode})</strong>
+            <span class="order-status-pill status-${statusClass}">${safeStatus}</span>
           </div>
-          <p style="font-size: 13px; color: #555;">${ord.items}</p>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <span style="font-weight: 700; color: var(--caramel);">$${parseFloat(ord.total).toFixed(2)}</span>
+          <p style="font-size: 13px; color: #555; margin-bottom: 10px;">${safeItems}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-weight: 800; color: var(--caramel); font-size: 15px;">$${totalNum.toFixed(2)}</span>
+              <span style="font-size: 11px; color: #999; margin-left: 8px;">Placed at ${safeTime}</span>
+            </div>
             <div style="display: flex; gap: 6px;">
-              <button class="btn btn-outline btn-sm" onclick="advanceOrderStatus('${ord.id}')">Advance Status →</button>
-              <button class="btn btn-danger btn-sm" onclick="refundOrder('${ord.id}')">Refund</button>
+              <button class="btn btn-outline btn-sm" onclick="advanceOrderStatus('${safeId}')">Advance Status →</button>
+              <button class="btn btn-danger btn-sm" onclick="refundOrder('${safeId}')">Refund / Cancel</button>
             </div>
           </div>
         `;
         container.appendChild(card);
       });
+      renderDashboard();
     }
 
-    function advanceOrderStatus(id) {
+    async function advanceOrderStatus(id) {
       const ord = orders.find(o => o.id === id);
       if (!ord) return;
       const flow = { "RECEIVED": "PREPARING", "PREPARING": "READY", "READY": "COMPLETED", "COMPLETED": "COMPLETED" };
-      ord.status = flow[ord.status] || "COMPLETED";
-      localStorage.setItem("artesano_orders", JSON.stringify(orders));
+      const newStatus = flow[ord.status] || "COMPLETED";
+      ord.status = newStatus;
+      if (window.ArtesanoBackend) {
+        await window.ArtesanoBackend.updateOrderStatus(id, newStatus);
+      }
       renderOrders();
-      addAudit(`Advanced ${id} to ${ord.status}`);
-      showToast(`Order status: ${ord.status}`);
+      addAudit(`Advanced order ${id} status to ${newStatus}`);
+      showToast(`Order status: ${newStatus}`);
     }
 
-    function refundOrder(id) {
-      const reason = prompt("Refund reason:", "Guest cancellation");
+    async function refundOrder(id) {
+      const reason = prompt("Enter cancellation or refund reason:", "Guest cancellation before pickup");
       if (reason) {
         const ord = orders.find(o => o.id === id);
         if (ord) {
-          ord.status = "REFUNDED (" + reason + ")";
-          localStorage.setItem("artesano_orders", JSON.stringify(orders));
+          const newStatus = "REFUNDED (" + reason + ")";
+          ord.status = newStatus;
+          if (window.ArtesanoBackend) {
+            await window.ArtesanoBackend.updateOrderStatus(id, newStatus);
+          }
           renderOrders();
-          addAudit(`Refunded order ${id}: ${reason}`);
-          showToast(`Order refunded`);
+          addAudit(`Order ${id} refunded/cancelled: ${reason}`);
+          showToast(`Order cancelled and recorded.`);
         }
       }
     }
 
-    function seedSampleOrder() {
-      const newOrd = {
-        id: "ORD-" + Math.floor(100 + Math.random() * 900),
-        customer: "Tribeca Guest",
-        items: "1x Pan con Chicharrón, 1x Peruvian Alfajores",
-        total: 15.90,
-        status: "RECEIVED",
-        time: new Date().toLocaleTimeString()
-      };
-      orders.unshift(newOrd);
-      localStorage.setItem("artesano_orders", JSON.stringify(orders));
-      renderOrders();
-      addAudit(`New incoming order ${newOrd.id}`);
-      showToast(`New order received!`);
-    }
-
-    // Audit Log
-    function renderAudit() {
-      const container = document.getElementById("auditList");
+    // Reservations Manager (Anti-XSS & Cloud Synced)
+    async function renderReservations() {
+      const container = document.getElementById("reservationsList");
+      if (!container) return;
+      if (window.ArtesanoBackend) {
+        reservations = await window.ArtesanoBackend.getReservations();
+      }
       container.innerHTML = "";
-      auditLogs.forEach(entry => {
-        const d = document.createElement("div");
-        d.className = "audit-entry";
-        d.innerHTML = `
-          <div>${entry.text}</div>
-          <div class="audit-time">${entry.time}</div>
+
+      if (reservations.length === 0) {
+        container.innerHTML = "<p style='color: #888; padding: 20px; text-align: center;'>No table reservations submitted yet.</p>";
+        renderDashboard();
+        return;
+      }
+
+      reservations.forEach((res) => {
+        const item = document.createElement("div");
+        item.style.cssText = "padding: 16px; border: 1px solid #EAEAEA; border-radius: 8px; margin-bottom: 10px; background: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;";
+        const safeName = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.name || "") : (res.name || "");
+        const safeGuests = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(String(res.guests || "2")) : String(res.guests || "2");
+        const safeDate = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.date || "") : (res.date || "");
+        const safeTime = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.time || "") : (res.time || "");
+        const safeId = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.id || "") : (res.id || "");
+        const safePhone = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.phone || "") : (res.phone || "");
+        const safeNotes = res.notes ? (window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.notes) : res.notes) : "";
+        const safeStatus = window.ArtesanoSecurity ? window.ArtesanoSecurity.escapeHtml(res.status || "CONFIRMED") : (res.status || "CONFIRMED");
+
+        item.innerHTML = `
+          <div>
+            <strong>${safeName}</strong> (${safeGuests} Guests) · <span style="color: var(--caramel); font-weight: 700;">${safeDate} at ${safeTime}</span>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Code: ${safeId} · Tel: ${safePhone} ${safeNotes ? `· Notes: "${safeNotes}"` : ''}</div>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="order-status-pill status-${safeStatus}">${safeStatus}</span>
+            <button class="btn btn-outline btn-sm" onclick="setReservationStatus('${safeId}', 'SEATED')">Seat Guests</button>
+            <button class="btn btn-danger btn-sm" onclick="setReservationStatus('${safeId}', 'CANCELLED')">Cancel</button>
+          </div>
         `;
-        container.appendChild(d);
+        container.appendChild(item);
       });
+      renderDashboard();
     }
 
-    // Backup & Reset
+    async function setReservationStatus(id, st) {
+      const res = reservations.find(r => r.id === id);
+      if (res) {
+        res.status = st;
+        if (window.ArtesanoBackend) {
+          await window.ArtesanoBackend.updateReservationStatus(id, st);
+        }
+        renderReservations();
+        addAudit(`Reservation ${id} marked as ${st}`);
+        showToast(`Reservation updated: ${st}`);
+      }
+    }
+
+    // Branding Settings
+    function renderBrandingInputs() {
+      document.getElementById("settingAnnouncementActive").value = currentSettings.announcementActive ? "true" : "false";
+      document.getElementById("settingAnnouncementText").value = currentSettings.announcement || "";
+      document.getElementById("settingHeroHeadline").value = currentSettings.headline || "";
+      document.getElementById("settingHeroSubheadline").value = currentSettings.subheadline || "";
+      document.getElementById("settingMorningSchedule").value = currentSettings.morningWindow || "Morning Menu Served Daily 8:00 AM – 11:00 AM";
+
+      document.getElementById("settingAddress").value = currentSettings.address || "90 Chambers St Unit B, New York, NY 10007, United States";
+      document.getElementById("settingPhone").value = currentSettings.phone || "+1 212-372-0297";
+      document.getElementById("settingHours").value = currentSettings.hours || "Monday – Friday: 7:30 AM – 6:00 PM\nSaturday – Sunday: 8:00 AM – 5:00 PM";
+    }
+
+    async function saveBrandingSettings(e) {
+      e.preventDefault();
+      currentSettings.announcementActive = document.getElementById("settingAnnouncementActive").value === "true";
+      currentSettings.announcement = document.getElementById("settingAnnouncementText").value.trim();
+      currentSettings.headline = document.getElementById("settingHeroHeadline").value.trim();
+      currentSettings.subheadline = document.getElementById("settingHeroSubheadline").value.trim();
+      currentSettings.morningWindow = document.getElementById("settingMorningSchedule").value.trim();
+
+      if (window.ArtesanoBackend) {
+        await window.ArtesanoBackend.saveSettings(currentSettings);
+      }
+      addAudit("Updated homepage copy, announcement banner and hero settings");
+      showToast("Branding settings saved!");
+    }
+
+    async function saveContactSettings(e) {
+      e.preventDefault();
+      currentSettings.address = document.getElementById("settingAddress").value.trim();
+      currentSettings.phone = document.getElementById("settingPhone").value.trim();
+      currentSettings.hours = document.getElementById("settingHours").value.trim();
+
+      if (window.ArtesanoBackend) {
+        await window.ArtesanoBackend.saveSettings(currentSettings);
+      }
+      addAudit("Updated Tribeca store contact details and operating hours");
+      showToast("Store contact details saved!");
+    }
+
+    // Backup & Restore (Sanitized)
     function exportMenuJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentMenu, null, 2));
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        version: "2.0",
+        cafe: "Artesano Cafe Tribeca",
+        menu: currentMenu,
+        categories: categories,
+        settings: currentSettings
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
       const a = document.createElement("a");
       a.setAttribute("href", dataStr);
-      a.setAttribute("download", "artesano_menu.json");
+      a.setAttribute("download", `artesano_backup_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(a);
       a.click();
       a.remove();
-      showToast("Menu JSON exported!");
+      addAudit("Exported verified menu & settings backup JSON");
+      showToast("Backup exported successfully!");
     }
 
     function importMenuJSON(input) {
       if (input.files && input.files[0]) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
           try {
-            const imported = JSON.parse(e.target.result);
-            if (Array.isArray(imported)) {
-              currentMenu = imported;
-              localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
-              renderDishes();
-              addAudit("Imported menu from external JSON");
-              showToast("Menu JSON imported successfully!");
+            const raw = JSON.parse(e.target.result);
+            const imported = window.ArtesanoSecurity ? window.ArtesanoSecurity.deepSanitize(raw) : raw;
+
+            if (imported && (Array.isArray(imported.menu) || Array.isArray(imported))) {
+              const newMenu = Array.isArray(imported.menu) ? imported.menu : imported;
+              if (confirm(`Restore ${newMenu.length} dishes from this backup? Live menu will be updated.`)) {
+                currentMenu = newMenu;
+                if (window.ArtesanoBackend) {
+                  for (const dish of currentMenu) {
+                    await window.ArtesanoBackend.saveMenuItem(dish);
+                  }
+                }
+                if (imported.settings) {
+                  currentSettings = imported.settings;
+                  if (window.ArtesanoBackend) {
+                    await window.ArtesanoBackend.saveSettings(currentSettings);
+                  }
+                }
+                if (imported.categories && Array.isArray(imported.categories)) {
+                  categories = imported.categories;
+                  try {
+                    localStorage.setItem("artesano_categories", JSON.stringify(categories));
+                  } catch (e) {}
+                }
+                await initAdmin();
+                addAudit(`Imported ${newMenu.length} dishes from external backup file`);
+                showToast("Backup imported successfully!");
+              }
+            } else {
+              alert("Invalid JSON format. Expected an Artesano Cafe backup file.");
             }
           } catch(err) {
-            alert("Invalid JSON format.");
+            alert("Error parsing backup JSON file: " + err.message);
           }
         };
         reader.readAsText(input.files[0]);
       }
     }
 
-    function confirmResetDefaults() {
-      if (confirm("Reset menu and settings to factory defaults? Any custom items will be restored to seed values.")) {
+    async function confirmResetDefaults() {
+      if (confirm("Restore factory defaults? Any custom dishes will be reset to seed values.")) {
         currentMenu = JSON.parse(JSON.stringify(defaultMenu));
-        localStorage.setItem("artesano_menu", JSON.stringify(currentMenu));
-        localStorage.removeItem("artesano_settings");
-        currentSettings = { status: "OPEN" };
-        renderDishes();
-        renderSettings();
-        addAudit("Reset to factory defaults");
+        currentSettings.status = "OPEN";
+        if (window.ArtesanoBackend) {
+          for (const dish of currentMenu) {
+            await window.ArtesanoBackend.saveMenuItem(dish);
+          }
+          await window.ArtesanoBackend.saveSettings(currentSettings);
+        }
+        await initAdmin();
+        addAudit("Restored factory seed menu");
         showToast("Restored default Tribeca artisan menu.");
       }
     }
+
+    // Initialize on page load
+    document.addEventListener("DOMContentLoaded", () => {
+      checkSession();
+    });
   </script>
 </body>
 </html>
